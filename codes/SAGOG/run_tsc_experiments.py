@@ -42,7 +42,7 @@ EarlyStopping = sagog_utils.EarlyStopping
 
 # Configuration
 epoches = 200
-batch_size = 64
+batch_size = 16  # Reduced from 64 to avoid OOM
 seed = 243
 learning_rate = 5e-4
 weight_decay = 5e-4
@@ -113,9 +113,12 @@ print(f"Train samples: {len(train_data)}, Test samples: {len(test_data)}")
 # Create SAGoG model
 print("\nInitializing SAGoG model...")
 
-# Adjust number of windows based on sequence length
-# For very long sequences, use more windows; for short sequences, use fewer
-if segment_size >= 1000:
+# Adjust number of windows based on sequence length and channel count
+# Reduce windows for high-channel datasets to save memory
+if input_nc >= 50:
+    # For high channel count (like Heartbeat with 61 channels), use fewer windows
+    num_windows = 3
+elif segment_size >= 1000:
     num_windows = 10
 elif segment_size >= 500:
     num_windows = 8
@@ -125,15 +128,19 @@ else:
     num_windows = 3
 
 # Adjust hidden dimensions based on number of channels
+# Reduce dimensions to avoid OOM
 if input_nc >= 500:
+    hidden_dim = 16
+    graph_hidden_dim = 32
+    num_graph_layers = 1
+elif input_nc >= 50:  # Heartbeat has 61 channels
     hidden_dim = 32
     graph_hidden_dim = 64
-elif input_nc >= 100:
-    hidden_dim = 48
-    graph_hidden_dim = 96
+    num_graph_layers = 1
 else:
     hidden_dim = 64
     graph_hidden_dim = 128
+    num_graph_layers = 2
 
 model = SAGoG(
     num_variables=input_nc,
@@ -141,7 +148,7 @@ model = SAGoG(
     num_classes=class_num,
     hidden_dim=hidden_dim,
     graph_hidden_dim=graph_hidden_dim,
-    num_graph_layers=2,
+    num_graph_layers=num_graph_layers,
     num_windows=num_windows,
     graph_construction='adaptive',
     gnn_type='gcn'
