@@ -30,13 +30,16 @@ For faster execution on a multi-GPU workstation (e.g., 3-4 RTX 3090s):
 
 ```bash
 # Run ALL experiments in parallel across 4 GPUs
-python run_parallel_experiments.py --gpus 0 1 2 3
+python run_parallel_experiments_v2.py --gpus 0 1 2 3
 
 # Run only HAR experiments across 3 GPUs
-python run_parallel_experiments.py --gpus 0 1 2 --har
+python run_parallel_experiments_v2.py --gpus 0 1 2 --har
 
 # Run only TSC experiments across 3 GPUs
-python run_parallel_experiments.py --gpus 0 1 2 --tsc
+python run_parallel_experiments_v2.py --gpus 0 1 2 --tsc
+
+# Run specific models and datasets
+python run_parallel_experiments_v2.py --gpus 0 1 --models SAGOG MPTSNet --datasets-har UCI_HAR DSADS --har
 ```
 
 ### Calculate FLOPs
@@ -92,13 +95,13 @@ The parallel runner supports two splitting strategies:
 **By Dataset (default):**
 ```bash
 # All models for dataset A on GPU 0, all models for dataset B on GPU 1, etc.
-python run_parallel_experiments.py --gpus 0 1 2 3 --split dataset
+python run_parallel_experiments_v2.py --gpus 0 1 2 3 --split dataset
 ```
 
 **By Model:**
 ```bash
 # All datasets for SAGOG on GPU 0, all datasets for GTWIDL on GPU 1, etc.
-python run_parallel_experiments.py --gpus 0 1 2 3 --split model
+python run_parallel_experiments_v2.py --gpus 0 1 2 3 --split model
 ```
 
 ## Output Structure
