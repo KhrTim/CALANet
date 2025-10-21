@@ -1,0 +1,204 @@
+\begin{thebibliography}{40}
+\providecommand{\natexlab}[1]{#1}
+
+\bibitem[{An et~al.(2023)An, Rahman, Zhou, and Kang}]{an2023comprehensive}
+An, Q.; Rahman, S.; Zhou, J.; and Kang, J.~J. 2023.
+\newblock A comprehensive review on machine learning in healthcare industry: classification, restrictions, opportunities and challenges.
+\newblock \emph{Sensors}, 23(9): 4178.
+
+\bibitem[{Bagnall et~al.(2018)Bagnall, Dau, Lines, Flynn, Large, Bostrom, Southam, and Keogh}]{bagnall2018uea}
+Bagnall, A.; Dau, H.~A.; Lines, J.; Flynn, M.; Large, J.; Bostrom, A.; Southam, P.; and Keogh, E. 2018.
+\newblock The UEA multivariate time series classification archive, 2018.
+\newblock \emph{arXiv preprint arXiv:1811.00075}.
+
+\bibitem[{Baydogan, Runger, and Tuv(2013)}]{baydogan2013bag}
+Baydogan, M.~G.; Runger, G.; and Tuv, E. 2013.
+\newblock A bag-of-features framework to classify time series.
+\newblock \emph{IEEE transactions on pattern analysis and machine intelligence}, 35(11): 2796--2802.
+
+\bibitem[{Cai et~al.(2024)Cai, Liang, Liu, Feng, and Wu}]{cai2024msgnet}
+Cai, W.; Liang, Y.; Liu, X.; Feng, J.; and Wu, Y. 2024.
+\newblock Msgnet: Learning multi-scale inter-series correlations for multivariate time series forecasting.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, volume~38, 11141--11149.
+
+\bibitem[{Chen et~al.(2024)Chen, Qiu, Zhu, Li, Wang, Sotiras, Wang, and Razi}]{chen2024timemil}
+Chen, X.; Qiu, P.; Zhu, W.; Li, H.; Wang, H.; Sotiras, A.; Wang, Y.; and Razi, A. 2024.
+\newblock TimeMIL: Advancing Multivariate Time Series Classification via a Time-aware Multiple Instance Learning.
+\newblock \emph{arXiv preprint arXiv:2405.03140}.
+
+\bibitem[{Cui, Chen, and Chen(2016)}]{cui2016multi}
+Cui, Z.; Chen, W.; and Chen, Y. 2016.
+\newblock Multi-scale convolutional neural networks for time series classification.
+\newblock \emph{arXiv preprint arXiv:1603.06995}.
+
+\bibitem[{Farahani et~al.(2023)Farahani, McCormick, Gianinny, Hudacheck, Harik, Liu, and Wuest}]{farahani2023time}
+Farahani, M.~A.; McCormick, M.; Gianinny, R.; Hudacheck, F.; Harik, R.; Liu, Z.; and Wuest, T. 2023.
+\newblock Time-series pattern recognition in Smart Manufacturing Systems: A literature review and ontology.
+\newblock \emph{Journal of Manufacturing Systems}, 69: 208--241.
+
+\bibitem[{Gu, Goel, and R{\'e}(2021)}]{gu2021efficiently}
+Gu, A.; Goel, K.; and R{\'e}, C. 2021.
+\newblock Efficiently modeling long sequences with structured state spaces.
+\newblock \emph{arXiv preprint arXiv:2111.00396}.
+
+\bibitem[{Ienco and Gaetano(2007)}]{ienco2007tiselac}
+Ienco, D.; and Gaetano, R. 2007.
+\newblock Tiselac: time series land cover classification challenge.
+\newblock \emph{TiSeLaC: Time Series Land Cover Classification Challenge}, 2.
+
+\bibitem[{Karim et~al.(2017)Karim, Majumdar, Darabi, and Chen}]{karim2017lstm}
+Karim, F.; Majumdar, S.; Darabi, H.; and Chen, S. 2017.
+\newblock LSTM fully convolutional networks for time series classification.
+\newblock \emph{IEEE access}, 6: 1662--1669.
+
+\bibitem[{Karim et~al.(2019)Karim, Majumdar, Darabi, and Harford}]{karim2019multivariate}
+Karim, F.; Majumdar, S.; Darabi, H.; and Harford, S. 2019.
+\newblock Multivariate LSTM-FCNs for time series classification.
+\newblock \emph{Neural networks}, 116: 237--245.
+
+\bibitem[{Lai et~al.(2018)Lai, Chang, Yang, and Liu}]{lai2018modeling}
+Lai, G.; Chang, W.-C.; Yang, Y.; and Liu, H. 2018.
+\newblock Modeling long-and short-term temporal patterns with deep neural networks.
+\newblock In \emph{The 41st international ACM SIGIR conference on research \& development in information retrieval}, 95--104.
+
+\bibitem[{Lai et~al.(2023)Lai, Zhang, Liu, Qian, Wei, Chen, Chen, and Yin}]{lai2023interformer}
+Lai, Z.-H.; Zhang, T.-H.; Liu, Q.; Qian, X.; Wei, L.-F.; Chen, S.-L.; Chen, F.; and Yin, X.-C. 2023.
+\newblock InterFormer: Interactive Local and Global Features Fusion for Automatic Speech Recognition.
+\newblock \emph{arXiv preprint arXiv:2305.16342}.
+
+\bibitem[{Li et~al.(2021)Li, Choi, Xu, Bhowmick, Chun, and Wong}]{li2021shapenet}
+Li, G.; Choi, B.; Xu, J.; Bhowmick, S.~S.; Chun, K.-P.; and Wong, G. L.-H. 2021.
+\newblock Shapenet: A shapelet-neural network approach for multivariate time series classification.
+\newblock In \emph{Proceedings of the AAAI conference on artificial intelligence}, volume~35, 8375--8383.
+
+\bibitem[{Li et~al.(2023{\natexlab{a}})Li, Yang, Su, Li, and Wang}]{li2023human}
+Li, Y.; Yang, G.; Su, Z.; Li, S.; and Wang, Y. 2023{\natexlab{a}}.
+\newblock Human activity recognition based on multienvironment sensor data.
+\newblock \emph{Information Fusion}, 91: 47--63.
+
+\bibitem[{Li et~al.(2023{\natexlab{b}})Li, Rao, Pan, and Xu}]{li2023mts}
+Li, Z.; Rao, Z.; Pan, L.; and Xu, Z. 2023{\natexlab{b}}.
+\newblock Mts-mixers: Multivariate time series forecasting via factorized temporal and channel mixing.
+\newblock \emph{arXiv preprint arXiv:2302.04501}.
+
+\bibitem[{Lines et~al.(2012)Lines, Davis, Hills, and Bagnall}]{lines2012shapelet}
+Lines, J.; Davis, L.~M.; Hills, J.; and Bagnall, A. 2012.
+\newblock A shapelet transform for time series classification.
+\newblock In \emph{Proceedings of the 18th ACM SIGKDD international conference on Knowledge discovery and data mining}, 289--297.
+
+\bibitem[{Liu et~al.(2024)Liu, Yang, Liu, Chen, Liang, Wang, Cui, and Gu}]{liu2024todynet}
+Liu, H.; Yang, D.; Liu, X.; Chen, X.; Liang, Z.; Wang, H.; Cui, Y.; and Gu, J. 2024.
+\newblock Todynet: temporal dynamic graph neural network for multivariate time series classification.
+\newblock \emph{Information Sciences}, 120914.
+
+\bibitem[{Liu et~al.(2022)Liu, Zeng, Chen, Xu, Lai, Ma, and Xu}]{liu2022scinet}
+Liu, M.; Zeng, A.; Chen, M.; Xu, Z.; Lai, Q.; Ma, L.; and Xu, Q. 2022.
+\newblock Scinet: Time series modeling and forecasting with sample convolution and interaction.
+\newblock \emph{Advances in Neural Information Processing Systems}, 35: 5816--5828.
+
+\bibitem[{Luo and Wang(2024)}]{luo2024moderntcn}
+Luo, D.; and Wang, X. 2024.
+\newblock Moderntcn: A modern pure convolution structure for general time series analysis.
+\newblock In \emph{The Twelfth International Conference on Learning Representations}.
+
+\bibitem[{Nie et~al.(2023)Nie, Nguyen, Sinthong, and Kalagnanam}]{nie2023a}
+Nie, Y.; Nguyen, N.~H.; Sinthong, P.; and Kalagnanam, J. 2023.
+\newblock A Time Series is Worth 64 Words: Long-term Forecasting with Transformers.
+\newblock In \emph{The Eleventh International Conference on Learning Representations}.
+
+\bibitem[{Ru{\ss}wurm et~al.(2023)Ru{\ss}wurm, Courty, Emonet, Lef{\`e}vre, Tuia, and Tavenard}]{russwurm2023end}
+Ru{\ss}wurm, M.; Courty, N.; Emonet, R.; Lef{\`e}vre, S.; Tuia, D.; and Tavenard, R. 2023.
+\newblock End-to-end learned early classification of time series for in-season crop type mapping.
+\newblock \emph{ISPRS Journal of Photogrammetry and Remote Sensing}, 196: 445--456.
+
+\bibitem[{Sch{\"a}fer and Leser(2017)}]{schafer2017multivariate}
+Sch{\"a}fer, P.; and Leser, U. 2017.
+\newblock Multivariate time series classification with WEASEL+ MUSE.
+\newblock \emph{arXiv preprint arXiv:1711.11343}.
+
+\bibitem[{Tang et~al.(2022)Tang, Long, Liu, Zhou, Blumenstein, and Jiang}]{tangomni}
+Tang, W.; Long, G.; Liu, L.; Zhou, T.; Blumenstein, M.; and Jiang, J. 2022.
+\newblock Omni-Scale CNNs: a simple and effective kernel size configuration for time series classification.
+\newblock In \emph{International Conference on Learning Representations}.
+
+\bibitem[{Wang et~al.(2023)Wang, Peng, Huang, Wang, Chen, and Xiao}]{wang2023micn}
+Wang, H.; Peng, J.; Huang, F.; Wang, J.; Chen, J.; and Xiao, Y. 2023.
+\newblock Micn: Multi-scale local and global context modeling for long-term series forecasting.
+\newblock In \emph{The eleventh international conference on learning representations}.
+
+\bibitem[{Wang et~al.(2022)Wang, Chen, Hershkovich, Yang, Shetty, Singh, Jiang, Kotla, Shang, Yerrabelli et~al.}]{wang2022systematic}
+Wang, W.~K.; Chen, I.; Hershkovich, L.; Yang, J.; Shetty, A.; Singh, G.; Jiang, Y.; Kotla, A.; Shang, J.~Z.; Yerrabelli, R.; et~al. 2022.
+\newblock A systematic review of time series classification techniques used in biomedical applications.
+\newblock \emph{Sensors}, 22(20): 8016.
+
+\bibitem[{Wen et~al.(2022)Wen, Zhou, Zhang, Chen, Ma, Yan, and Sun}]{wen2022transformers}
+Wen, Q.; Zhou, T.; Zhang, C.; Chen, W.; Ma, Z.; Yan, J.; and Sun, L. 2022.
+\newblock Transformers in time series: A survey.
+\newblock \emph{arXiv preprint arXiv:2202.07125}.
+
+\bibitem[{Wu et~al.(2023)Wu, Hu, Liu, Zhou, Wang, and Long}]{wu2023timesnet}
+Wu, H.; Hu, T.; Liu, Y.; Zhou, H.; Wang, J.; and Long, M. 2023.
+\newblock TimesNet: Temporal 2D-Variation Modeling for General Time Series Analysis.
+\newblock In \emph{The Eleventh International Conference on Learning Representations}.
+
+\bibitem[{Wu et~al.(2022)Wu, Wu, Xu, Wang, and Long}]{wu2022flowformer}
+Wu, H.; Wu, J.; Xu, J.; Wang, J.; and Long, M. 2022.
+\newblock Flowformer: Linearizing transformers with conservation flows.
+\newblock \emph{arXiv preprint arXiv:2202.06258}.
+
+\bibitem[{Yang et~al.(2015)Yang, Nguyen, San, Li, and Krishnaswamy}]{yang2015deep}
+Yang, J.; Nguyen, M.~N.; San, P.~P.; Li, X.; and Krishnaswamy, S. 2015.
+\newblock Deep convolutional neural networks on multichannel time series for human activity recognition.
+\newblock In \emph{Ijcai}, volume~15, 3995--4001. Buenos Aires, Argentina.
+
+\bibitem[{Yu, Kim, and Mechefske(2021)}]{yu2021analysis}
+Yu, W.; Kim, I.~Y.; and Mechefske, C. 2021.
+\newblock Analysis of different RNN autoencoder variants for time series classification and machine prognostics.
+\newblock \emph{Mechanical Systems and Signal Processing}, 149: 107322.
+
+\bibitem[{Zeng et~al.(2023)Zeng, Chen, Zhang, and Xu}]{zeng2023transformers}
+Zeng, A.; Chen, M.; Zhang, L.; and Xu, Q. 2023.
+\newblock Are transformers effective for time series forecasting?
+\newblock In \emph{Proceedings of the AAAI conference on artificial intelligence}, volume~37, 11121--11128.
+
+\bibitem[{Zhang et~al.(2022)Zhang, Zhang, Cao, Bian, Yi, Zheng, and Li}]{zhang2022less}
+Zhang, T.; Zhang, Y.; Cao, W.; Bian, J.; Yi, X.; Zheng, S.; and Li, J. 2022.
+\newblock Less is more: Fast multivariate time series forecasting with light sampling-oriented mlp structures.
+\newblock \emph{arXiv preprint arXiv:2207.01186}.
+
+\bibitem[{Zhang et~al.(2020)Zhang, Gao, Lin, and Lu}]{zhang2020tapnet}
+Zhang, X.; Gao, Y.; Lin, J.; and Lu, C.-T. 2020.
+\newblock Tapnet: Multivariate time series classification with attentional prototypical network.
+\newblock In \emph{Proceedings of the AAAI conference on artificial intelligence}, volume~34, 6845--6852.
+
+\bibitem[{Zhang and Yan(2023)}]{zhang2023crossformer}
+Zhang, Y.; and Yan, J. 2023.
+\newblock Crossformer: Transformer utilizing cross-dimension dependency for multivariate time series forecasting.
+\newblock In \emph{The eleventh international conference on learning representations}.
+
+\bibitem[{Zhao et~al.(2017)Zhao, Lu, Chen, Liu, and Wu}]{zhao2017convolutional}
+Zhao, B.; Lu, H.; Chen, S.; Liu, J.; and Wu, D. 2017.
+\newblock Convolutional neural networks for time series classification.
+\newblock \emph{Journal of systems engineering and electronics}, 28(1): 162--169.
+
+\bibitem[{Zhao et~al.(2024)Zhao, Li, Hong, and Shen}]{zhao2024metarocketc}
+Zhao, J.; Li, Q.; Hong, Y.; and Shen, M. 2024.
+\newblock MetaRockETC: Adaptive Encrypted Traffic Classification in Complex Network Environments via Time Series Analysis and Meta-Learning.
+\newblock \emph{IEEE Transactions on Network and Service Management}.
+
+\bibitem[{Zheng et~al.(2014)Zheng, Liu, Chen, Ge, and Zhao}]{zheng2014time}
+Zheng, Y.; Liu, Q.; Chen, E.; Ge, Y.; and Zhao, J.~L. 2014.
+\newblock Time series classification using multi-channels deep convolutional neural networks.
+\newblock In \emph{International conference on web-age information management}, 298--310. Springer.
+
+\bibitem[{Zhou et~al.(2022)Zhou, Ma, Wen, Wang, Sun, and Jin}]{zhou2022fedformer}
+Zhou, T.; Ma, Z.; Wen, Q.; Wang, X.; Sun, L.; and Jin, R. 2022.
+\newblock Fedformer: Frequency enhanced decomposed transformer for long-term series forecasting.
+\newblock In \emph{International conference on machine learning}, 27268--27286. PMLR.
+
+\bibitem[{Zuo et~al.(2023)Zuo, Li, Choi, Bhowmick, Mah, and Wong}]{zuo2023svp}
+Zuo, R.; Li, G.; Choi, B.; Bhowmick, S.~S.; Mah, D. N.-y.; and Wong, G.~L. 2023.
+\newblock SVP-T: a shape-level variable-position transformer for multivariate time series classification.
+\newblock In \emph{Proceedings of the AAAI Conference on Artificial Intelligence}, volume~37, 11497--11505.
+
+\end{thebibliography}
