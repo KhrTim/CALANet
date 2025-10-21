@@ -23,8 +23,8 @@ class GraphConstructor(nn.Module):
 
         if method == 'adaptive':
             # Learnable adjacency matrix construction
-            self.weight = nn.Parameter(torch.randn(input_dim, hidden_dim))
-            self.bias = nn.Parameter(torch.zeros(hidden_dim))
+            # input_dim is 1 since we average over sequence length
+            self.projection = nn.Linear(1, hidden_dim)
 
     def forward(self, x):
         """
@@ -88,7 +88,8 @@ class GraphConstructor(nn.Module):
 
         # Project to hidden space
         x_mean = x.mean(dim=-1)  # [batch, num_vars]
-        h = torch.matmul(x_mean, self.weight) + self.bias  # [batch, num_vars, hidden_dim]
+        x_mean = x_mean.unsqueeze(-1)  # [batch, num_vars, 1]
+        h = self.projection(x_mean)  # [batch, num_vars, hidden_dim]
 
         edge_indices = []
         edge_weights = []

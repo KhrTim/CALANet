@@ -18,14 +18,15 @@ from aeon.datasets import load_from_arff_file
 
 # Get the absolute paths before changing directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+codes_dir = os.path.dirname(current_dir)
+project_root = os.path.dirname(codes_dir)
 
-# Add paths
-sys.path.append(os.path.join(parent_dir, 'codes/CALANet_local'))
+# Add paths - CALANet utils first for priority
+sys.path.insert(0, os.path.join(codes_dir, 'CALANet_local'))
 sys.path.append(current_dir)
 
-# Change to parent directory to access Data folder
-os.chdir(parent_dir)
+# Change to project root to access Data folder
+os.chdir(project_root)
 
 from utils import AvgrageMeter, accuracy
 from msdl import MSDL
