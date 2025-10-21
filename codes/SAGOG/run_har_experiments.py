@@ -18,21 +18,29 @@ from sklearn.metrics import classification_report
 
 # Get the absolute paths before changing directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+codes_dir = os.path.dirname(current_dir)
+parent_dir = os.path.dirname(codes_dir)
 
-# Add paths - CALANet utils first for priority
-sys.path.insert(0, os.path.join(parent_dir, 'codes/CALANet_local'))
-sys.path.append(current_dir)
+# Add SAGOG path for model imports
+sys.path.insert(0, current_dir)
 
 # Change to parent directory to access Data folder
 os.chdir(parent_dir)
 
-# Import from CALANet utils
-from utils import data_info, Read_Data, AvgrageMeter, accuracy
+# Import SAGOG model
 from sagog_model import SAGoG
 
-# Import EarlyStopping from SAGOG's utils by importing directly
+# Import from CALANet utils using explicit path to avoid conflicts
 import importlib.util
+spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(codes_dir, 'CALANet_local/utils.py'))
+calanet_utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(calanet_utils)
+data_info = calanet_utils.data_info
+Read_Data = calanet_utils.Read_Data
+AvgrageMeter = calanet_utils.AvgrageMeter
+accuracy = calanet_utils.accuracy
+
+# Import EarlyStopping from SAGOG's utils by importing directly
 spec = importlib.util.spec_from_file_location("sagog_utils", os.path.join(current_dir, "utils.py"))
 sagog_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sagog_utils)

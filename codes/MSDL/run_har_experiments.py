@@ -17,18 +17,28 @@ from sklearn.metrics import classification_report
 
 # Get the absolute paths before changing directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+codes_dir = os.path.dirname(current_dir)
+parent_dir = os.path.dirname(codes_dir)
 
-# Add paths
-sys.path.append(os.path.join(parent_dir, 'codes/CALANet_local'))
-sys.path.append(current_dir)
+# Add MSDL path for model imports
+sys.path.insert(0, current_dir)
 
 # Change to parent directory to access Data folder
 os.chdir(parent_dir)
 
-from utils import data_info, Read_Data, AvgrageMeter, accuracy
+# Import MSDL model and trainer
 from msdl import MSDL
 from train import MSDLTrainer
+
+# Import from CALANet utils using explicit path to avoid conflicts
+import importlib.util
+spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(codes_dir, 'CALANet_local/utils.py'))
+calanet_utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(calanet_utils)
+data_info = calanet_utils.data_info
+Read_Data = calanet_utils.Read_Data
+AvgrageMeter = calanet_utils.AvgrageMeter
+accuracy = calanet_utils.accuracy
 
 # Configuration
 epoches = 500

@@ -43,7 +43,7 @@ accuracy = calanet_utils.accuracy
 
 # Configuration
 epoches = 100
-batch_size = 64
+batch_size = 64  # Will be adjusted for specific datasets below
 seed = 243
 learning_rate = 0.001
 weight_decay = 0.001
@@ -70,6 +70,11 @@ TSC_INFO = {
 input_nc = TSC_INFO[dataset]["channels"]
 segment_size = TSC_INFO[dataset]["length"]
 class_num = TSC_INFO[dataset]["classes"]
+
+# Adjust batch size for memory-intensive datasets
+if dataset == "MotorImagery" or segment_size >= 2000:
+    batch_size = 16  # Reduce batch size for very long sequences
+    print(f"Adjusted batch_size to {batch_size} for long sequences")
 
 print(f"Running MPTSNet on {dataset}")
 print(f"Input channels: {input_nc}, Segment size: {segment_size}, Classes: {class_num}")
@@ -115,8 +120,13 @@ print(f"Train samples: {len(train_data)}, Test samples: {len(test_data)}")
 num_channels = input_nc
 seq_length = segment_size
 
-# Adjust embedding dimensions based on dataset size
-if num_channels >= 500:
+# Adjust embedding dimensions based on dataset size and sequence length
+# Special handling for very long sequences to avoid OOM
+if seq_length >= 2000:
+    # Very long sequences - use minimal dimensions
+    embed_dim = 32
+    embed_dim_t = 64
+elif num_channels >= 500:
     embed_dim = 32
     embed_dim_t = 128
 elif num_channels >= 100:

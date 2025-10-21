@@ -33,7 +33,7 @@ os.chdir(parent_dir)
 
 # Now import from CALANet utils (will be named calanet_utils to avoid conflicts)
 import importlib.util
-spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(parent_dir, 'codes/CALANet_local/utils.py'))
+spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(parent_dir, 'CALANet_local/utils.py'))
 calanet_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(calanet_utils)
 data_info = calanet_utils.data_info
