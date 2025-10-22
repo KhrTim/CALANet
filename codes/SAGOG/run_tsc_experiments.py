@@ -104,6 +104,15 @@ print(f"Train shape: {train_X.shape}, Test shape: {test_X.shape}")
 train_data = TensorDataset(torch.FloatTensor(train_X), torch.LongTensor(train_Y))
 test_data = TensorDataset(torch.FloatTensor(test_X), torch.LongTensor(test_Y))
 
+# Adjust epochs based on dataset complexity to prevent timeouts
+train_samples = len(train_data)
+total_features = input_nc * segment_size
+if total_features > 100000 or (train_samples > 3000 and class_num > 30):
+    # Very high-dimensional (PEMS-SF: 963×144=138k) or complex multi-class
+    epoches = 50
+    early_stopping_patience = 15
+    print(f"Adjusted epochs to {epoches} and patience to {early_stopping_patience} for complex dataset")
+
 # Create data loaders
 train_queue = DataLoader(
     train_data, batch_size=batch_size, shuffle=True,

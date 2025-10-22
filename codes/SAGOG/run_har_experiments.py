@@ -89,6 +89,17 @@ else:
 # Load data
 train_data, eval_data, y_test_unary = Read_Data(dataset, input_nc)
 
+# Adjust epochs based on dataset size to prevent timeouts
+train_samples = len(train_data)
+if train_samples > 15000:
+    epoches = 50  # Very large datasets (KU-HAR: 16k, PAMAP2: 20k)
+    early_stopping_patience = 15
+    print(f"Adjusted epochs to {epoches} and patience to {early_stopping_patience} for very large dataset ({train_samples} samples)")
+elif train_samples > 8000:
+    epoches = 75  # Large datasets (REALDISP: 8.9k)
+    early_stopping_patience = 20
+    print(f"Adjusted epochs to {epoches} and patience to {early_stopping_patience} for large dataset ({train_samples} samples)")
+
 # Create data loaders
 train_queue = DataLoader(
     train_data, batch_size=batch_size, shuffle=True,

@@ -16,18 +16,30 @@ from sklearn.model_selection import train_test_split
 
 # Get the absolute paths before changing directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+codes_dir = os.path.dirname(current_dir)
+parent_dir = os.path.dirname(codes_dir)
 
-# Add paths - CALANet utils first for priority
-sys.path.insert(0, os.path.join(parent_dir, 'codes/CALANet_local'))
-sys.path.append(current_dir)
+# Remove script directory from sys.path if it was auto-added by Python
+if current_dir in sys.path:
+    sys.path.remove(current_dir)
+
+# Add GTWIDL path first for its own modules
+sys.path.insert(0, current_dir)
 
 # Change to parent directory to access Data folder
 os.chdir(parent_dir)
 
-from utils import data_info, Read_Data
+# Import GTWIDL modules first
 from gtwidl import GTWIDL
 from classification import GTWIDLClassifier
+
+# Import from CALANet utils using importlib to avoid conflicts with GTWIDL/utils.py
+import importlib.util
+spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(codes_dir, 'CALANet_local/utils.py'))
+calanet_utils = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(calanet_utils)
+data_info = calanet_utils.data_info
+Read_Data = calanet_utils.Read_Data
 
 # Configuration
 epoches = 100
@@ -98,7 +110,7 @@ gtwidl_model = GTWIDL(
     n_basis=5,
     basis_type='polynomial',
     lambda_sparse=0.1,
-    max_iter=50,
+    max_iter=20,  # Reduced from 50 to prevent timeouts (paper suggests convergence by iteration 15)
     device=device,
     verbose=True
 )

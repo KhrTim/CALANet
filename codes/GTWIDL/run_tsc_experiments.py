@@ -19,6 +19,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 codes_dir = os.path.dirname(current_dir)
 project_root = os.path.dirname(codes_dir)
 
+# Remove script directory from sys.path if it was auto-added by Python
+if current_dir in sys.path:
+    sys.path.remove(current_dir)
+
 # Add paths
 sys.path.insert(0, os.path.join(codes_dir, 'CALANet_local'))
 sys.path.append(current_dir)
@@ -107,7 +111,7 @@ gtwidl_model = GTWIDL(
     n_basis=5,
     basis_type='polynomial',
     lambda_sparse=0.1,
-    max_iter=50,
+    max_iter=20,  # Reduced from 50 to prevent timeouts (paper suggests convergence by iteration 15)
     device=device,
     verbose=True
 )
