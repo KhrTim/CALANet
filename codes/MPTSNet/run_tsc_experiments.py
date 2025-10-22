@@ -73,7 +73,7 @@ class_num = TSC_INFO[dataset]["classes"]
 
 # Adjust batch size for memory-intensive datasets
 if dataset == "MotorImagery" or segment_size >= 2000:
-    batch_size = 16  # Reduce batch size for very long sequences
+    batch_size = 8  # Reduce batch size for very long sequences
     print(f"Adjusted batch_size to {batch_size} for long sequences")
 
 print(f"Running MPTSNet on {dataset}")
@@ -124,8 +124,8 @@ seq_length = segment_size
 # Special handling for very long sequences to avoid OOM
 if seq_length >= 2000:
     # Very long sequences - use minimal dimensions
-    embed_dim = 32
-    embed_dim_t = 64
+    embed_dim = 16
+    embed_dim_t = 32
 elif num_channels >= 500:
     embed_dim = 32
     embed_dim_t = 128

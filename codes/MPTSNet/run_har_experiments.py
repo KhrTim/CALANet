@@ -18,22 +18,23 @@ from sklearn.metrics import classification_report
 
 # Get the absolute paths before changing directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
+codes_dir = os.path.dirname(current_dir)
+project_root = os.path.dirname(codes_dir)
 
 # Add MPTSNet path first so model can import its own utils
 sys.path.insert(0, current_dir)
-sys.path.insert(1, os.path.join(parent_dir, 'codes/CALANet_local'))
+sys.path.insert(1, os.path.join(codes_dir, 'CALANet_local'))
 
 # Import MPTSNet model and utilities BEFORE changing directory
 from model.MPTSNet import Model
 from utils import fft_main_periods_wo_duplicates
 
-# Change to parent directory to access Data folder
-os.chdir(parent_dir)
+# Change to project root to access Data folder
+os.chdir(project_root)
 
 # Now import from CALANet utils (will be named calanet_utils to avoid conflicts)
 import importlib.util
-spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(parent_dir, 'CALANet_local/utils.py'))
+spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(codes_dir, 'CALANet_local/utils.py'))
 calanet_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(calanet_utils)
 data_info = calanet_utils.data_info

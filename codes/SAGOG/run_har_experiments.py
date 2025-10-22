@@ -65,6 +65,11 @@ dataset = "KU-HAR"
 
 input_nc, segment_size, class_num = data_info(dataset)
 
+# Adjust batch size for memory-intensive datasets
+if input_nc >= 100 or (input_nc * segment_size) > 20000:
+    batch_size = 32  # Reduce for high-dimensional datasets
+    print(f"Adjusted batch_size to {batch_size} for high-dimensional dataset")
+
 print(f"Running SAGoG on {dataset}")
 print(f"Input channels: {input_nc}, Segment size: {segment_size}, Classes: {class_num}")
 
