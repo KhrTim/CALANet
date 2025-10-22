@@ -43,12 +43,12 @@ AvgrageMeter = calanet_utils.AvgrageMeter
 accuracy = calanet_utils.accuracy
 
 # Configuration
-epoches = 50  # Reduced from 100 to prevent timeouts (DSADS took 50min with 100 epochs)
+epoches = 25  # ULTRA-AGGRESSIVE: Reduced from 50 (KU-HAR still timed out at 60min with 50 epochs)
 batch_size = 64  # Reduced to avoid memory issues
 seed = 243
 learning_rate = 0.001
 weight_decay = 0.001
-early_stopping_patience = 10  # Reduced from 15 for faster early stopping
+early_stopping_patience = 8  # Reduced from 10 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
 #dataset = "UCI_HAR"

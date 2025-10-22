@@ -45,7 +45,7 @@ Read_Data = calanet_utils.Read_Data
 epoches = 100
 batch_size = 128
 seed = 243
-n_atoms = 15  # Reduced from 20 to speed up dictionary learning
+n_atoms = 10  # ULTRA-AGGRESSIVE: Reduced from 15 to prevent 60min timeouts
 atom_length_ratio = 0.5  # atom length as ratio of segment size
 
 # Dataset selection (uncomment the one you want to run)
@@ -110,7 +110,7 @@ gtwidl_model = GTWIDL(
     n_basis=5,
     basis_type='polynomial',
     lambda_sparse=0.1,
-    max_iter=20,  # Reduced from 50 to prevent timeouts (paper suggests convergence by iteration 15)
+    max_iter=10,  # ULTRA-AGGRESSIVE: Reduced from 20 (all HAR experiments timed out at 60min with max_iter=20)
     device=device,
     verbose=True
 )
