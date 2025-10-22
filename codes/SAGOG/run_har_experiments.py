@@ -47,12 +47,12 @@ spec.loader.exec_module(sagog_utils)
 EarlyStopping = sagog_utils.EarlyStopping
 
 # Configuration
-epoches = 500
+epoches = 100  # Reduced from 500 to prevent timeouts on large datasets
 batch_size = 128
 seed = 243
 learning_rate = 5e-4
 weight_decay = 5e-4
-early_stopping_patience = 50
+early_stopping_patience = 30  # Reduced from 50 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
 #dataset = "UCI_HAR"

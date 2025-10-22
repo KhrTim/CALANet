@@ -22,6 +22,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 codes_dir = os.path.dirname(current_dir)
 project_root = os.path.dirname(codes_dir)
 
+# Remove script directory from sys.path if it was auto-added by Python
+if current_dir in sys.path:
+    sys.path.remove(current_dir)
+
 # Add paths - CALANet utils first for priority
 sys.path.insert(0, os.path.join(codes_dir, 'CALANet_local'))
 sys.path.append(current_dir)
@@ -41,12 +45,12 @@ spec.loader.exec_module(sagog_utils)
 EarlyStopping = sagog_utils.EarlyStopping
 
 # Configuration
-epoches = 200
+epoches = 100  # Reduced from 200 to prevent timeouts
 batch_size = 16  # Reduced from 64 to avoid OOM
 seed = 243
 learning_rate = 5e-4
 weight_decay = 5e-4
-early_stopping_patience = 30
+early_stopping_patience = 20  # Reduced from 30 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
 #dataset = "AtrialFibrillation"

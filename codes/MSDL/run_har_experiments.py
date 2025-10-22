@@ -41,7 +41,7 @@ AvgrageMeter = calanet_utils.AvgrageMeter
 accuracy = calanet_utils.accuracy
 
 # Configuration
-epoches = 500
+epoches = 100  # Reduced from 500 to prevent timeouts on large datasets
 batch_size = 128
 seed = 243
 learning_rate = 5e-4

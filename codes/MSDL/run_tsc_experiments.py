@@ -21,6 +21,10 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 codes_dir = os.path.dirname(current_dir)
 project_root = os.path.dirname(codes_dir)
 
+# Remove script directory from sys.path if it was auto-added by Python
+if current_dir in sys.path:
+    sys.path.remove(current_dir)
+
 # Add paths - CALANet utils first for priority
 sys.path.insert(0, os.path.join(codes_dir, 'CALANet_local'))
 sys.path.append(current_dir)
@@ -32,7 +36,7 @@ from utils import AvgrageMeter, accuracy
 from msdl import MSDL
 
 # Configuration
-epoches = 200
+epoches = 100  # Reduced from 200 to prevent timeouts
 batch_size = 64
 seed = 243
 learning_rate = 5e-4
