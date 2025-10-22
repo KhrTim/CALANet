@@ -45,7 +45,7 @@ Read_Data = calanet_utils.Read_Data
 epoches = 100
 batch_size = 128
 seed = 243
-n_atoms = 20
+n_atoms = 15  # Reduced from 20 to speed up dictionary learning
 atom_length_ratio = 0.5  # atom length as ratio of segment size
 
 # Dataset selection (uncomment the one you want to run)
