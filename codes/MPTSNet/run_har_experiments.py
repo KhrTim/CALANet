@@ -43,12 +43,12 @@ AvgrageMeter = calanet_utils.AvgrageMeter
 accuracy = calanet_utils.accuracy
 
 # Configuration
-epoches = 25  # ULTRA-AGGRESSIVE: Reduced from 50 (KU-HAR still timed out at 60min with 50 epochs)
+epoches = 10  # FINAL: 25 epochs timed out on KU-HAR/PAMAP2/REALDISP (large datasets: 16k-20k samples)
 batch_size = 64  # Reduced to avoid memory issues
 seed = 243
 learning_rate = 0.001
 weight_decay = 0.001
-early_stopping_patience = 8  # Reduced from 10 for faster early stopping
+early_stopping_patience = 5  # Reduced from 8 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
 dataset = "UCI_HAR"

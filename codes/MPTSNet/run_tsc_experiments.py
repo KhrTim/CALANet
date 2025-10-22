@@ -42,12 +42,12 @@ AvgrageMeter = calanet_utils.AvgrageMeter
 accuracy = calanet_utils.accuracy
 
 # Configuration
-epoches = 25  # TESTED: MPTSNet HAR takes 41+ min with 25 epochs on UCI_HAR, but TSC already succeeds
+epoches = 15  # FINAL: MPTSNet HAR reduced to 10, TSC kept slightly higher (already successful)
 batch_size = 64  # Will be adjusted for specific datasets below
 seed = 243
 learning_rate = 0.001
 weight_decay = 0.001
-early_stopping_patience = 8  # Reduced from 10 for faster early stopping
+early_stopping_patience = 6  # Reduced from 8 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
 #dataset = "AtrialFibrillation"
