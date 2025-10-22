@@ -87,13 +87,16 @@ def worker(task_queue, result_queue, gpu_id):
             env = os.environ.copy()
             env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
+            # Set model-specific timeout (GTWIDL dictionary learning is very slow)
+            timeout_seconds = 7200 if model == 'GTWIDL' else 3600  # 2 hours for GTWIDL, 1 hour for others
+
             # Run experiment from project root
             result = subprocess.run(
                 [sys.executable, temp_script],
                 env=env,
                 capture_output=True,
                 text=True,
-                timeout=3600
+                timeout=timeout_seconds
             )
 
             elapsed = time.time() - start_time

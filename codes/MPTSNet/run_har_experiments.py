@@ -51,13 +51,13 @@ weight_decay = 0.001
 early_stopping_patience = 8  # Reduced from 10 for faster early stopping
 
 # Dataset selection (uncomment the one you want to run)
-#dataset = "UCI_HAR"
+dataset = "UCI_HAR"
 #dataset = "UniMiB-SHAR"
 #dataset = "DSADS"
 #dataset = "OPPORTUNITY"
 #dataset = "KU-HAR"
 #dataset = "PAMAP2"
-dataset = "REALDISP"
+#dataset = "REALDISP"
 
 input_nc, segment_size, class_num = data_info(dataset)
 
