@@ -91,7 +91,7 @@ def worker(task_queue, result_queue, gpu_id):
             if model == 'GTWIDL':
                 timeout_seconds = 18000  # 5 hours for GTWIDL (dictionary learning is very slow)
             elif model == 'SAGOG':
-                timeout_seconds = 7200   # 2 hours for SAGOG (large datasets like PAMAP2 need >1 hour)
+                timeout_seconds = 10800  # 3 hours for SAGOG (15-20 epochs on large datasets, ~18 sec/epoch)
             else:
                 timeout_seconds = 3600   # 1 hour for MPTSNet and MSDL
 
