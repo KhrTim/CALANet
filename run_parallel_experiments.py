@@ -87,8 +87,13 @@ def worker(task_queue, result_queue, gpu_id):
             env = os.environ.copy()
             env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
-            # Set model-specific timeout (GTWIDL dictionary learning is very slow)
-            timeout_seconds = 18000 if model == 'GTWIDL' else 3600  # 5 hours for GTWIDL, 1 hour for others
+            # Set model-specific timeout (GTWIDL and SAGOG are slow on large datasets)
+            if model == 'GTWIDL':
+                timeout_seconds = 18000  # 5 hours for GTWIDL (dictionary learning is very slow)
+            elif model == 'SAGOG':
+                timeout_seconds = 7200   # 2 hours for SAGOG (large datasets like PAMAP2 need >1 hour)
+            else:
+                timeout_seconds = 3600   # 1 hour for MPTSNet and MSDL
 
             # Run experiment from project root
             result = subprocess.run(
