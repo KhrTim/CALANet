@@ -69,6 +69,10 @@ input_nc, segment_size, class_num = data_info(dataset)
 if input_nc >= 100 or (input_nc * segment_size) > 20000:
     batch_size = 32  # Reduce for high-dimensional datasets
     print(f"Adjusted batch_size to {batch_size} for high-dimensional dataset")
+elif (input_nc * segment_size) > 10000:
+    # Medium-high dimensional datasets (PAMAP2: 31×512=15872)
+    batch_size = 64  # Moderate reduction to prevent OOM on large sample counts
+    print(f"Adjusted batch_size to {batch_size} for medium-high dimensional dataset")
 
 print(f"Running SAGoG on {dataset}")
 print(f"Input channels: {input_nc}, Segment size: {segment_size}, Classes: {class_num}")
