@@ -45,7 +45,7 @@ Read_Data = calanet_utils.Read_Data
 epoches = 100
 batch_size = 128
 seed = 243
-n_atoms = 3  # FINAL EXTREME: Reduced from 5 (tested: 5 atoms/5 iters still takes >5 min on UCI_HAR)
+n_atoms = 20  # Original paper configuration
 atom_length_ratio = 0.5  # atom length as ratio of segment size
 
 # Dataset selection (uncomment the one you want to run)
@@ -110,14 +110,14 @@ gtwidl_model = GTWIDL(
     n_basis=5,
     basis_type='polynomial',
     lambda_sparse=0.1,
-    max_iter=3,  # FINAL EXTREME: Reduced from 5 (tested: 5 iters/5 atoms takes >5 min on UCI_HAR)
+    max_iter=50,  # Original paper configuration
     device=device,
     verbose=True
 )
 
 # Train dictionary (this might take a while for large datasets)
 # For very large datasets, consider using a subset for dictionary learning
-max_samples_for_dict = 1000  # FINAL EXTREME: Reduced from 2000 (tested: 2000 samples too slow)
+max_samples_for_dict = 5000  # Original paper configuration
 if len(X_train_torch) > max_samples_for_dict:
     print(f"\nUsing {max_samples_for_dict} samples for dictionary learning (full dataset is {len(X_train_torch)})")
     indices = np.random.choice(len(X_train_torch), max_samples_for_dict, replace=False)

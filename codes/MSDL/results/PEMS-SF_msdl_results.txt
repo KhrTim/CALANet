@@ -1,0 +1,21 @@
+MSDL Results on PEMS-SF
+======================================================================
+Best Epoch: 98
+Test Accuracy: 0.6763
+Test F1 (Weighted): 0.6378
+Test F1 (Macro): 0.6357
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+           0     1.0000    0.7667    0.8679        30
+           1     0.0000    0.0000    0.0000        25
+           2     0.4490    0.8462    0.5867        26
+           3     0.5588    0.8261    0.6667        23
+           4     0.6667    0.6364    0.6512        22
+           5     0.9524    0.7407    0.8333        27
+           6     0.7600    0.9500    0.8444        20
+
+    accuracy                         0.6763       173
+   macro avg     0.6267    0.6809    0.6357       173
+weighted avg     0.6365    0.6763    0.6378       173

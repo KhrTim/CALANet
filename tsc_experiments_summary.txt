@@ -1,6 +1,0 @@
-TSC Experiments Summary
-================================================================================
-
-SAGOG:
-  AtrialFibrillation  : FAILED
-

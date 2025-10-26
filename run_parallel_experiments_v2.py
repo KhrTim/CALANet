@@ -94,7 +94,7 @@ def worker(task_queue, result_queue, gpu_id, project_root):
                 capture_output=True,
                 text=True,
                 cwd=project_root,
-                timeout=3600
+                timeout=None  # No timeout - let experiments run to completion
             )
 
             elapsed = time.time() - start_time

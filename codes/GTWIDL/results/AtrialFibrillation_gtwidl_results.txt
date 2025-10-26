@@ -1,0 +1,16 @@
+GTWIDL Results on AtrialFibrillation
+======================================================================
+Test Accuracy: 0.0667
+Test F1 (Weighted): 0.0606
+Test F1 (Macro): 0.0606
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+           0     0.0000    0.0000    0.0000         5
+           1     0.0000    0.0000    0.0000         5
+           2     0.1667    0.2000    0.1818         5
+
+    accuracy                         0.0667        15
+   macro avg     0.0556    0.0667    0.0606        15
+weighted avg     0.0556    0.0667    0.0606        15

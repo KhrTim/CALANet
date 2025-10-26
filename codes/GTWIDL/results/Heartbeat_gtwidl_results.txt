@@ -1,0 +1,15 @@
+GTWIDL Results on Heartbeat
+======================================================================
+Test Accuracy: 0.7463
+Test F1 (Weighted): 0.6718
+Test F1 (Macro): 0.5305
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+           0     0.7449    0.9865    0.8488       148
+           1     0.7778    0.1228    0.2121        57
+
+    accuracy                         0.7463       205
+   macro avg     0.7613    0.5546    0.5305       205
+weighted avg     0.7540    0.7463    0.6718       205

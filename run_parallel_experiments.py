@@ -87,13 +87,8 @@ def worker(task_queue, result_queue, gpu_id):
             env = os.environ.copy()
             env['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
 
-            # Set model-specific timeout (NO TIMEOUT for GTWIDL and SAGOG to ensure completion)
-            if model == 'GTWIDL':
-                timeout_seconds = None  # No timeout - let GTWIDL complete (may take many hours)
-            elif model == 'SAGOG':
-                timeout_seconds = None  # No timeout - let SAGOG complete
-            else:
-                timeout_seconds = 3600   # 1 hour for MPTSNet and MSDL (already 100% successful)
+            # No timeout for any model - let all experiments run to completion
+            timeout_seconds = None
 
             # Run experiment from project root
             result = subprocess.run(

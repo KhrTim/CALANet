@@ -1,0 +1,16 @@
+MPTSNet Results on MotorImagery
+======================================================================
+Best Epoch: 11
+Test Accuracy: 0.6000
+Test F1 (Weighted): 0.5920
+Test F1 (Macro): 0.5920
+
+Detailed Classification Report:
+              precision    recall  f1-score   support
+
+           0     0.5781    0.7400    0.6491        50
+           1     0.6389    0.4600    0.5349        50
+
+    accuracy                         0.6000       100
+   macro avg     0.6085    0.6000    0.5920       100
+weighted avg     0.6085    0.6000    0.5920       100

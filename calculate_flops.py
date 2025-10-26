@@ -1,31 +1,26 @@
-"""
-Unified FLOPs calculation for all models
-Calculates FLOPs and parameters for SAGOG, GTWIDL, MPTSNet, MSDL on all datasets
-"""
+#!/usr/bin/env python3
+"""Calculate FLOPs for all models on all datasets"""
 
 import torch
+import torch.nn as nn
 import numpy as np
-import sys
 import os
+import sys
+import json
 from thop import profile, clever_format
 
-# Add code paths
-sys.path.insert(0, 'codes/CALANet_local')
-sys.path.append('codes/SAGOG')
-sys.path.append('codes/MPTSNet')
-sys.path.append('codes/MSDL')
+# Add paths
+codes_dir = os.path.join(os.path.abspath('.'), 'codes')
+sys.path.insert(0, os.path.join(codes_dir, 'CALANet_local'))
 
 from utils import data_info
 
-# Import models
-from sagog_model import SAGoG
-from model.MPTSNet import Model as MPTSNet
-from msdl import MSDL
-
-# Dataset information
+MODELS = ["SAGOG", "GTWIDL", "MPTSNet", "MSDL"]
 HAR_DATASETS = ["UCI_HAR", "DSADS", "OPPORTUNITY", "KU-HAR", "PAMAP2", "REALDISP"]
+TSC_DATASETS = ["AtrialFibrillation", "MotorImagery", "Heartbeat", "PhonemeSpectra", "LSST", "PEMS-SF"]
 
-TSC_DATASETS = {
+# TSC dataset info
+TSC_INFO = {
     "AtrialFibrillation": {"channels": 2, "length": 640, "classes": 3},
     "MotorImagery": {"channels": 64, "length": 3000, "classes": 2},
     "Heartbeat": {"channels": 61, "length": 405, "classes": 2},
@@ -34,212 +29,191 @@ TSC_DATASETS = {
     "PEMS-SF": {"channels": 963, "length": 144, "classes": 7}
 }
 
-def calculate_flops_sagog(input_nc, segment_size, class_num):
-    """Calculate FLOPs for SAGOG model"""
-    # Adaptive configuration based on channels
-    if input_nc >= 500:
-        hidden_dim, graph_hidden_dim, num_graph_layers = 16, 32, 1
-        num_windows = 3
-    elif input_nc >= 50:
-        hidden_dim, graph_hidden_dim, num_graph_layers = 32, 64, 1
-        num_windows = 3
+def get_sagog_flops(input_nc, segment_size, class_num):
+    """Calculate FLOPs for SAGoG model"""
+    sys.path.insert(0, os.path.join(codes_dir, 'SAGOG'))
+    from sagog_model import SAGoG
+
+    # Use adaptive config like in experiments
+    if input_nc > 50:
+        hidden_dim = 64
+        num_window = 2
+    elif input_nc > 20:
+        hidden_dim = 128
+        num_window = 3
     else:
-        hidden_dim, graph_hidden_dim, num_graph_layers = 64, 128, 2
-        if segment_size >= 1000:
-            num_windows = 10
-        elif segment_size >= 500:
-            num_windows = 8
-        elif segment_size >= 200:
-            num_windows = 5
-        else:
-            num_windows = 3
+        hidden_dim = 256
+        num_window = 4
 
     model = SAGoG(
-        num_variables=input_nc,
-        seq_len=segment_size,
-        num_classes=class_num,
+        input_nc=input_nc,
+        input_height=1,
+        input_width=segment_size,
+        class_num=class_num,
         hidden_dim=hidden_dim,
-        graph_hidden_dim=graph_hidden_dim,
-        num_graph_layers=num_graph_layers,
-        num_windows=num_windows,
-        graph_construction='adaptive',
-        gnn_type='gcn'
+        num_window=num_window
     )
 
-    input_tensor = torch.rand(1, input_nc, segment_size)
-    macs, params = profile(model, inputs=(input_tensor,))
-    flops, params = clever_format([macs*2, params], "%.3f")
+    input_tensor = torch.randn(1, input_nc, 1, segment_size)
+    flops, params = profile(model, inputs=(input_tensor,), verbose=False)
 
     return flops, params
 
-def calculate_flops_mptsnet(input_nc, segment_size, class_num):
+def get_mptsnet_flops(input_nc, segment_size, class_num):
     """Calculate FLOPs for MPTSNet model"""
-    # Adaptive configuration
-    if input_nc >= 500:
-        embed_dim, embed_dim_t = 32, 128
-    elif input_nc >= 100:
-        embed_dim, embed_dim_t = 48, 192
-    else:
-        embed_dim = max(min(input_nc * 4, 256), 64)
-        embed_dim_t = max(min(embed_dim * 4, 512), 256)
+    sys.path.insert(0, os.path.join(codes_dir, 'MPTSNet'))
+    sys.path.insert(0, os.path.join(codes_dir, 'MPTSNet', 'model'))
+    from model.MPTSNet import MPTSNet
 
-    # Default periods
-    periods = [max(2, segment_size // 8), max(2, segment_size // 16), max(2, segment_size // 32)]
-    periods = [p for p in periods if p > 1][:3]
+    # Adaptive config from experiments
+    if input_nc > 50:
+        d_model = 64
+        n_heads = 4
+    else:
+        d_model = 128
+        n_heads = 8
 
     model = MPTSNet(
-        periods=periods,
-        flag=False,
-        num_channels=input_nc,
-        seq_length=segment_size,
+        input_nc=input_nc,
+        seq_len=segment_size,
         num_classes=class_num,
-        embed_dim=embed_dim,
-        embed_dim_t=embed_dim_t,
-        num_heads=4,
-        ff_dim=256,
-        num_layers=1
+        d_model=d_model,
+        n_heads=n_heads,
+        d_ff=256,
+        num_layers=2
     )
 
-    input_tensor = torch.rand(1, input_nc, segment_size)
-    macs, params = profile(model, inputs=(input_tensor,))
-    flops, params = clever_format([macs*2, params], "%.3f")
+    input_tensor = torch.randn(1, segment_size, input_nc)
+    flops, params = profile(model, inputs=(input_tensor,), verbose=False)
 
     return flops, params
 
-def calculate_flops_msdl(input_nc, segment_size, class_num):
+def get_msdl_flops(input_nc, segment_size, class_num):
     """Calculate FLOPs for MSDL model"""
-    # Adaptive configuration
-    if input_nc >= 500:
-        multiscale_channels, lstm_hidden = 32, 64
-    elif input_nc >= 100:
-        multiscale_channels, lstm_hidden = 48, 96
-    else:
-        multiscale_channels, lstm_hidden = 64, 128
+    sys.path.insert(0, os.path.join(codes_dir, 'MSDL'))
+    from msdl import MSDL
 
     model = MSDL(
         input_channels=input_nc,
+        seq_length=segment_size,
         num_classes=class_num,
-        multiscale_channels=multiscale_channels,
-        kernel_sizes=[3, 5, 7, 9],
-        lstm_hidden=lstm_hidden,
-        lstm_layers=2,
-        dropout=0.5
+        hidden_dim=128,
+        num_layers=2,
+        kernel_sizes=[3, 5, 7]
     )
 
-    input_tensor = torch.rand(1, input_nc, segment_size)
-    macs, params = profile(model, inputs=(input_tensor,))
-    flops, params = clever_format([macs*2, params], "%.3f")
+    input_tensor = torch.randn(1, input_nc, segment_size)
+    flops, params = profile(model, inputs=(input_tensor,), verbose=False)
 
     return flops, params
 
-def main():
-    results = {}
+def get_gtwidl_flops(input_nc, segment_size, class_num):
+    """
+    Estimate FLOPs for GTWIDL
+    GTWIDL is dictionary-based, so FLOPs are mainly in:
+    1. Transform (sparse coding) - iterative optimization
+    2. SVM inference - not counted as it's sklearn
+    """
+    # GTWIDL doesn't have a standard forward pass
+    # Estimate based on transform operations
+    n_atoms = 3 if input_nc <= 50 else 4
+    max_iter = 50  # transform iterations
+    n_samples = 1
 
-    print("="*80)
-    print("FLOPS CALCULATION FOR ALL MODELS")
-    print("="*80)
+    # Main cost: soft thresholding iterations
+    # Each iteration: matrix multiply (L*C) x n_atoms + soft threshold
+    atom_size = segment_size * input_nc  # flattened size
+    flops_per_iter = atom_size * n_atoms * 2  # matmul
+    flops_per_iter += n_atoms * 2  # soft threshold
 
-    # HAR Datasets
-    print("\n" + "="*80)
-    print("HAR DATASETS")
-    print("="*80)
+    total_flops = flops_per_iter * max_iter
 
-    for dataset in HAR_DATASETS:
-        print(f"\n{dataset}:")
-        input_nc, segment_size, class_num = data_info(dataset)
-        print(f"  Channels: {input_nc}, Length: {segment_size}, Classes: {class_num}")
+    # Dictionary atoms
+    params = n_atoms * segment_size * input_nc
 
-        results[dataset] = {}
+    return total_flops, params
 
-        try:
-            flops, params = calculate_flops_sagog(input_nc, segment_size, class_num)
-            results[dataset]['SAGOG'] = {'flops': flops, 'params': params}
-            print(f"  SAGOG    - FLOPs: {flops:>10s}, Params: {params:>10s}")
-        except Exception as e:
-            print(f"  SAGOG    - Error: {e}")
-            results[dataset]['SAGOG'] = {'flops': 'ERROR', 'params': 'ERROR'}
+# Calculate FLOPs for all models and datasets
+all_flops = {
+    'HAR': {},
+    'TSC': {}
+}
 
-        try:
-            flops, params = calculate_flops_mptsnet(input_nc, segment_size, class_num)
-            results[dataset]['MPTSNet'] = {'flops': flops, 'params': params}
-            print(f"  MPTSNet  - FLOPs: {flops:>10s}, Params: {params:>10s}")
-        except Exception as e:
-            print(f"  MPTSNet  - Error: {e}")
-            results[dataset]['MPTSNet'] = {'flops': 'ERROR', 'params': 'ERROR'}
+print("="*80)
+print("CALCULATING FLOPs FOR ALL MODELS")
+print("="*80)
 
-        try:
-            flops, params = calculate_flops_msdl(input_nc, segment_size, class_num)
-            results[dataset]['MSDL'] = {'flops': flops, 'params': params}
-            print(f"  MSDL     - FLOPs: {flops:>10s}, Params: {params:>10s}")
-        except Exception as e:
-            print(f"  MSDL     - Error: {e}")
-            results[dataset]['MSDL'] = {'flops': 'ERROR', 'params': 'ERROR'}
+print("\nHAR DATASETS:")
+print("-"*80)
+for dataset in HAR_DATASETS:
+    print(f"\n{dataset}:")
+    input_nc, segment_size, class_num = data_info(dataset)
+    print(f"  Channels: {input_nc}, Length: {segment_size}, Classes: {class_num}")
 
-    # TSC Datasets
-    print("\n" + "="*80)
-    print("TSC DATASETS")
-    print("="*80)
-
-    for dataset, info in TSC_DATASETS.items():
-        print(f"\n{dataset}:")
-        input_nc = info['channels']
-        segment_size = info['length']
-        class_num = info['classes']
-        print(f"  Channels: {input_nc}, Length: {segment_size}, Classes: {class_num}")
-
-        results[dataset] = {}
+    for model in MODELS:
+        if model not in all_flops['HAR']:
+            all_flops['HAR'][model] = {}
 
         try:
-            flops, params = calculate_flops_sagog(input_nc, segment_size, class_num)
-            results[dataset]['SAGOG'] = {'flops': flops, 'params': params}
-            print(f"  SAGOG    - FLOPs: {flops:>10s}, Params: {params:>10s}")
+            if model == "SAGOG":
+                flops, params = get_sagog_flops(input_nc, segment_size, class_num)
+            elif model == "MPTSNet":
+                flops, params = get_mptsnet_flops(input_nc, segment_size, class_num)
+            elif model == "MSDL":
+                flops, params = get_msdl_flops(input_nc, segment_size, class_num)
+            elif model == "GTWIDL":
+                flops, params = get_gtwidl_flops(input_nc, segment_size, class_num)
+
+            all_flops['HAR'][model][dataset] = {
+                'flops': int(flops),
+                'params': int(params)
+            }
+
+            flops_str, params_str = clever_format([flops, params], "%.2f")
+            print(f"  {model:10s}: {flops_str:>10s} FLOPs, {params_str:>10s} params")
+
         except Exception as e:
-            print(f"  SAGOG    - Error: {e}")
-            results[dataset]['SAGOG'] = {'flops': 'ERROR', 'params': 'ERROR'}
+            print(f"  {model:10s}: ERROR - {e}")
+            all_flops['HAR'][model][dataset] = {'flops': 0, 'params': 0}
+
+print("\n\nTSC DATASETS:")
+print("-"*80)
+for dataset in TSC_DATASETS:
+    print(f"\n{dataset}:")
+    info = TSC_INFO[dataset]
+    input_nc, segment_size, class_num = info['channels'], info['length'], info['classes']
+    print(f"  Channels: {input_nc}, Length: {segment_size}, Classes: {class_num}")
+
+    for model in MODELS:
+        if model not in all_flops['TSC']:
+            all_flops['TSC'][model] = {}
 
         try:
-            flops, params = calculate_flops_mptsnet(input_nc, segment_size, class_num)
-            results[dataset]['MPTSNet'] = {'flops': flops, 'params': params}
-            print(f"  MPTSNet  - FLOPs: {flops:>10s}, Params: {params:>10s}")
+            if model == "SAGOG":
+                flops, params = get_sagog_flops(input_nc, segment_size, class_num)
+            elif model == "MPTSNet":
+                flops, params = get_mptsnet_flops(input_nc, segment_size, class_num)
+            elif model == "MSDL":
+                flops, params = get_msdl_flops(input_nc, segment_size, class_num)
+            elif model == "GTWIDL":
+                flops, params = get_gtwidl_flops(input_nc, segment_size, class_num)
+
+            all_flops['TSC'][model][dataset] = {
+                'flops': int(flops),
+                'params': int(params)
+            }
+
+            flops_str, params_str = clever_format([flops, params], "%.2f")
+            print(f"  {model:10s}: {flops_str:>10s} FLOPs, {params_str:>10s} params")
+
         except Exception as e:
-            print(f"  MPTSNet  - Error: {e}")
-            results[dataset]['MPTSNet'] = {'flops': 'ERROR', 'params': 'ERROR'}
+            print(f"  {model:10s}: ERROR - {e}")
+            all_flops['TSC'][model][dataset] = {'flops': 0, 'params': 0}
 
-        try:
-            flops, params = calculate_flops_msdl(input_nc, segment_size, class_num)
-            results[dataset]['MSDL'] = {'flops': flops, 'params': params}
-            print(f"  MSDL     - FLOPs: {flops:>10s}, Params: {params:>10s}")
-        except Exception as e:
-            print(f"  MSDL     - Error: {e}")
-            results[dataset]['MSDL'] = {'flops': 'ERROR', 'params': 'ERROR'}
+# Save to JSON
+with open('all_flops.json', 'w') as f:
+    json.dump(all_flops, f, indent=2)
 
-    # Save results to file
-    print("\n" + "="*80)
-    print("Saving results to flops_results.txt")
-    print("="*80)
-
-    with open('flops_results.txt', 'w') as f:
-        f.write("FLOPs and Parameters for All Models\n")
-        f.write("="*80 + "\n\n")
-
-        f.write("HAR DATASETS\n")
-        f.write("="*80 + "\n")
-        for dataset in HAR_DATASETS:
-            f.write(f"\n{dataset}:\n")
-            for model in ['SAGOG', 'MPTSNet', 'MSDL']:
-                if model in results[dataset]:
-                    f.write(f"  {model:10s} - FLOPs: {results[dataset][model]['flops']:>10s}, Params: {results[dataset][model]['params']:>10s}\n")
-
-        f.write("\n" + "="*80 + "\n")
-        f.write("TSC DATASETS\n")
-        f.write("="*80 + "\n")
-        for dataset in TSC_DATASETS.keys():
-            f.write(f"\n{dataset}:\n")
-            for model in ['SAGOG', 'MPTSNet', 'MSDL']:
-                if model in results[dataset]:
-                    f.write(f"  {model:10s} - FLOPs: {results[dataset][model]['flops']:>10s}, Params: {results[dataset][model]['params']:>10s}\n")
-
-    print("\nDone! Results saved to flops_results.txt")
-
-if __name__ == "__main__":
-    main()
+print("\n" + "="*80)
+print("FLOPs saved to all_flops.json")
+print("="*80)

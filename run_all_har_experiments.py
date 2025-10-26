@@ -85,7 +85,7 @@ def run_experiment(model_name, dataset, gpu_id=0):
             env=env,
             capture_output=True,
             text=True,
-            timeout=3600  # 1 hour timeout per experiment
+            timeout=None  # No timeout - let experiments run to completion
         )
 
         print(f"\n{'='*80}")
