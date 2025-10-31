@@ -45,12 +45,12 @@ spec.loader.exec_module(sagog_utils)
 EarlyStopping = sagog_utils.EarlyStopping
 
 # Configuration
-epoches = 10  # TESTED: SAGOG HAR takes 13+ min with 5 epochs on UCI_HAR, reduced from 100
-batch_size = 16  # Reduced from 64 to avoid OOM
+epoches = 500  # Original paper configuration
+batch_size = 64  # Original paper configuration
 seed = 243
 learning_rate = 5e-4
 weight_decay = 5e-4
-early_stopping_patience = 5  # Reduced from 20 for faster early stopping
+early_stopping_patience = 50  # Original paper configuration
 
 # Dataset selection (uncomment the one you want to run)
 #dataset = "AtrialFibrillation"
@@ -103,15 +103,6 @@ print(f"Train shape: {train_X.shape}, Test shape: {test_X.shape}")
 # Create datasets
 train_data = TensorDataset(torch.FloatTensor(train_X), torch.LongTensor(train_Y))
 test_data = TensorDataset(torch.FloatTensor(test_X), torch.LongTensor(test_Y))
-
-# TESTED: Adjust epochs based on dataset complexity (SAGOG HAR takes 13+ min with 5 epochs)
-train_samples = len(train_data)
-total_features = input_nc * segment_size
-if total_features > 100000 or (train_samples > 3000 and class_num > 30):
-    # Very high-dimensional (PEMS-SF: 963×144=138k) or complex multi-class
-    epoches = 5
-    early_stopping_patience = 3
-    print(f"TESTED: Adjusted epochs to {epoches} and patience to {early_stopping_patience} for complex dataset")
 
 # Create data loaders
 train_queue = DataLoader(

@@ -35,7 +35,7 @@ from classification import GTWIDLClassifier
 
 # Configuration
 seed = 243
-n_atoms = 20  # Original paper configuration
+n_atoms = 10  # Reduced for faster training (50% of original 20)
 atom_length_ratio = 1.0  # Use full length for TSC datasets
 
 # Dataset selection (uncomment the one you want to run)
@@ -111,14 +111,14 @@ gtwidl_model = GTWIDL(
     n_basis=5,
     basis_type='polynomial',
     lambda_sparse=0.1,
-    max_iter=50,  # Original paper configuration
+    max_iter=20,  # Reduced for faster training (40% of original 50)
     device=device,
     verbose=True
 )
 
 # Train dictionary (this might take a while for large datasets)
 # For very large datasets, consider using a subset for dictionary learning
-max_samples_for_dict = 5000  # Original paper configuration
+max_samples_for_dict = 2000  # Reduced for faster training (40% of original 5000)
 if len(X_train_torch) > max_samples_for_dict:
     print(f"\nUsing {max_samples_for_dict} samples for dictionary learning (full dataset is {len(X_train_torch)})")
     indices = np.random.choice(len(X_train_torch), max_samples_for_dict, replace=False)

@@ -47,12 +47,12 @@ spec.loader.exec_module(sagog_utils)
 EarlyStopping = sagog_utils.EarlyStopping
 
 # Configuration
-epoches = 20  # Increased from 5 (5 epochs = 18% accuracy, model can't learn). Balance between learning & timeout
+epoches = 500  # Original paper configuration
 batch_size = 128
 seed = 243
 learning_rate = 5e-4
 weight_decay = 5e-4
-early_stopping_patience = 10  # Increased from 3 to allow proper convergence
+early_stopping_patience = 50  # Original paper configuration
 
 # Dataset selection (uncomment the one you want to run)
 dataset = "UCI_HAR"
@@ -92,20 +92,6 @@ else:
 
 # Load data
 train_data, eval_data, y_test_unary = Read_Data(dataset, input_nc)
-
-# Adjust epochs based on dataset size (balance between learning and timeout)
-train_samples = len(train_data)
-if train_samples > 15000:
-    epoches = 15  # Very large datasets (KU-HAR: 16k, PAMAP2: 20k) - reduced from base 20
-    early_stopping_patience = 8
-    print(f"Adjusted epochs to {epoches} and patience to {early_stopping_patience} for very large dataset ({train_samples} samples)")
-elif train_samples > 8000:
-    epoches = 18  # Large datasets (REALDISP: 8.9k) - slightly reduced from base 20
-    early_stopping_patience = 9
-    print(f"Adjusted epochs to {epoches} and patience to {early_stopping_patience} for large dataset ({train_samples} samples)")
-else:
-    # Use base epochs for small/medium datasets
-    print(f"Using base epochs={epoches} for small/medium dataset ({train_samples} samples)")
 
 # Create data loaders
 train_queue = DataLoader(

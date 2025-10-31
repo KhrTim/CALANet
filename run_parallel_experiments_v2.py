@@ -70,14 +70,17 @@ def worker(task_queue, result_queue, gpu_id, project_root):
         print(f"\n[GPU {gpu_id}] Starting {model} on {dataset} ({dataset_type})")
         start_time = time.time()
 
-        # Get script path
-        script_path = os.path.join(project_root, MODEL_SCRIPTS[dataset_type][model])
+        # Get script path (relative to project root)
+        script_rel_path = MODEL_SCRIPTS[dataset_type][model]
+        script_full_path = os.path.join(project_root, script_rel_path)
 
         # Create modified script content
-        modified_content = modify_script_dataset(script_path, dataset)
+        modified_content = modify_script_dataset(script_full_path, dataset)
 
-        # Create temp script in project root
-        temp_script = os.path.join(project_root, f'temp_{model}_{dataset}_{gpu_id}.py')
+        # Create temp script in the SAME directory as original script (preserves __file__ paths)
+        script_dir = os.path.dirname(script_full_path)
+        script_name = os.path.basename(script_full_path)
+        temp_script = os.path.join(script_dir, f'temp_{dataset}_{gpu_id}_{script_name}')
 
         try:
             with open(temp_script, 'w') as f:
@@ -170,6 +173,8 @@ def main():
     parser = argparse.ArgumentParser(description='Run experiments in parallel across multiple GPUs')
     parser.add_argument('--gpus', nargs='+', type=int, default=[0, 1, 2, 3],
                         help='GPU IDs to use (e.g., --gpus 0 1 2 3)')
+    parser.add_argument('--processes-per-gpu', type=int, default=1,
+                        help='Number of processes to run per GPU (default: 1)')
     parser.add_argument('--split', choices=['model', 'dataset'], default='dataset',
                         help='How to split work: by model or by dataset')
     parser.add_argument('--har', action='store_true', help='Run HAR experiments')
@@ -199,6 +204,8 @@ def main():
     tsc_datasets = TSC_DATASETS if 'all' in args.datasets_tsc else args.datasets_tsc
 
     num_gpus = len(args.gpus)
+    processes_per_gpu = args.processes_per_gpu
+    total_workers = num_gpus * processes_per_gpu
     project_root = os.path.dirname(os.path.abspath(__file__))
 
     print(f"{'='*80}")
@@ -206,6 +213,8 @@ def main():
     print(f"{'='*80}")
     print(f"Project root: {project_root}")
     print(f"GPUs: {args.gpus} ({num_gpus} GPUs)")
+    print(f"Processes per GPU: {processes_per_gpu}")
+    print(f"Total worker processes: {total_workers}")
     print(f"Models: {models_to_run}")
     print(f"Split strategy: {args.split}")
     print(f"HAR experiments: {args.har}")
@@ -231,7 +240,8 @@ def main():
 
     total_tasks = len(tasks)
     print(f"Total experiments to run: {total_tasks}")
-    print(f"Estimated time with {num_gpus} GPUs: ~{(total_tasks / num_gpus) * 20} minutes")
+    est_time_mins = (total_tasks / total_workers) * 20
+    print(f"Estimated time with {total_workers} workers: ~{est_time_mins:.1f} minutes")
     print(f"(assuming ~20 min per experiment)\n")
 
     # Optionally reorder tasks based on split strategy
@@ -249,16 +259,19 @@ def main():
         task_queue.put(task)
 
     # Add poison pills to stop workers
-    for _ in range(num_gpus):
+    for _ in range(total_workers):
         task_queue.put(None)
 
-    # Start workers
-    print(f"Starting {num_gpus} worker processes...\n")
+    # Start workers (multiple processes per GPU if requested)
+    print(f"Starting {total_workers} worker processes...\n")
     workers = []
-    for i, gpu_id in enumerate(args.gpus):
-        p = Process(target=worker, args=(task_queue, result_queue, gpu_id, project_root))
-        p.start()
-        workers.append(p)
+    for gpu_id in args.gpus:
+        for proc_idx in range(processes_per_gpu):
+            # Each process on same GPU shares the GPU ID but gets unique worker ID
+            worker_id = f"{gpu_id}_{proc_idx}" if processes_per_gpu > 1 else str(gpu_id)
+            p = Process(target=worker, args=(task_queue, result_queue, gpu_id, project_root))
+            p.start()
+            workers.append(p)
 
     # Collect results
     results = []
