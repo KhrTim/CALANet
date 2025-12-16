@@ -121,6 +121,11 @@ model.apply(weight_init)
 print("param size = %fMB" % count_parameters_in_MB(model))
 
 optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=5e-4,
+    #betas=(0.5,0.9),
+    weight_decay=5e-4
+)
 
 # Initialize metrics collector
 metrics_collector = MetricsCollector(
@@ -128,11 +133,6 @@ metrics_collector = MetricsCollector(
     dataset=dataset,
     task_type='HAR',
     save_dir='results'
-)
-    model.parameters(),
-    lr=5e-4,
-    #betas=(0.5,0.9),
-    weight_decay=5e-4
 )
 max_f1 = 0
 weighted_avg_f1 = 0

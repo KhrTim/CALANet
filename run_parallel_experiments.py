@@ -15,8 +15,31 @@ from multiprocessing import Process, Queue
 HAR_DATASETS = ["UCI_HAR", "DSADS", "OPPORTUNITY", "KU-HAR", "PAMAP2", "REALDISP"]
 TSC_DATASETS = ["AtrialFibrillation", "MotorImagery", "Heartbeat", "PhonemeSpectra", "LSST", "PEMS-SF"]
 
-# Models
-MODELS = ["SAGOG", "GTWIDL", "MPTSNet", "MSDL"]
+# Model configurations: {model_name: {'har': script_path, 'tsc': script_path}}
+# None means model doesn't support that task type
+MODEL_CONFIGS = {
+    # Main models
+    "SAGOG": {"har": "codes/SAGOG/run_har_experiments.py", "tsc": "codes/SAGOG/run_tsc_experiments.py"},
+    "GTWIDL": {"har": "codes/GTWIDL/run_har_experiments.py", "tsc": "codes/GTWIDL/run_tsc_experiments.py"},
+    "MPTSNet": {"har": "codes/MPTSNet/run_har_experiments.py", "tsc": "codes/MPTSNet/run_tsc_experiments.py"},
+    "MSDL": {"har": "codes/MSDL/run_har_experiments.py", "tsc": "codes/MSDL/run_tsc_experiments.py"},
+
+    # HAR-only baseline models
+    "RepHAR": {"har": "codes/RepHAR/run.py", "tsc": None},
+    "DeepConvLSTM": {"har": "codes/DeepConvLSTM/run.py", "tsc": None},
+    "Bi-GRU-I": {"har": "codes/Bi-GRU-I/run.py", "tsc": None},
+    "RevTransformerAttentionHAR": {"har": "codes/RevTransformerAttentionHAR/run.py", "tsc": None},
+    "IF-ConvTransformer2": {"har": "codes/IF-ConvTransformer2/run.py", "tsc": None},
+
+    # Both HAR and TSC
+    "millet": {"har": "codes/millet/run.py", "tsc": "codes/millet/run_TSC.py"},
+    "DSN": {"har": "codes/DSN-master/run.py", "tsc": "codes/DSN-master/run_TSC.py"},
+
+    # TSC-only baseline models
+    "resnet": {"har": None, "tsc": "codes/resnet/run_TSC.py"},
+    "FCN": {"har": None, "tsc": "codes/FCN_TSC/run_TSC.py"},
+    "InceptionTime": {"har": None, "tsc": "codes/InceptionTime/run_TSC.py"},
+}
 
 def is_experiment_successful(model, dataset, dataset_type):
     """Check if an experiment has already completed successfully"""
@@ -47,11 +70,14 @@ def worker(task_queue, result_queue, gpu_id):
         print(f"\n[GPU {gpu_id}] [{start_timestamp}] Starting {model} on {dataset} ({dataset_type})")
         start_time = time.time()
 
-        # Determine script to run
-        if dataset_type == 'HAR':
-            script_path = f'codes/{model}/run_har_experiments.py'
-        else:
-            script_path = f'codes/{model}/run_tsc_experiments.py'
+        # Determine script to run from MODEL_CONFIGS
+        task_key = 'har' if dataset_type == 'HAR' else 'tsc'
+        script_path = MODEL_CONFIGS.get(model, {}).get(task_key)
+
+        if script_path is None:
+            print(f"[GPU {gpu_id}] ERROR: {model} does not support {dataset_type} tasks")
+            result_queue.put((model, dataset, dataset_type, "SKIPPED", 0))
+            continue
 
         # Create temp script in the SAME directory as the original script
         script_dir = os.path.dirname(script_path)
@@ -203,14 +229,16 @@ def main():
     all_tasks = []
 
     if args.har:
-        for model in MODELS:
-            for dataset in HAR_DATASETS:
-                all_tasks.append((model, dataset, 'HAR'))
+        for model, config in MODEL_CONFIGS.items():
+            if config['har'] is not None:  # Only include models that support HAR
+                for dataset in HAR_DATASETS:
+                    all_tasks.append((model, dataset, 'HAR'))
 
     if args.tsc:
-        for model in MODELS:
-            for dataset in TSC_DATASETS:
-                all_tasks.append((model, dataset, 'TSC'))
+        for model, config in MODEL_CONFIGS.items():
+            if config['tsc'] is not None:  # Only include models that support TSC
+                for dataset in TSC_DATASETS:
+                    all_tasks.append((model, dataset, 'TSC'))
 
     # Filter out already successful experiments
     print("Checking for already completed experiments...")
@@ -303,7 +331,7 @@ def main():
 
     # Print by model
     print("By Model:")
-    for model in MODELS:
+    for model in sorted(MODEL_CONFIGS.keys()):
         if model in by_model:
             successes = sum(1 for v in by_model[model].values() if v == 'SUCCESS')
             total = len(by_model[model])
@@ -328,7 +356,7 @@ def main():
         f.write("="*80 + "\n")
         f.write("By Model:\n")
         f.write("="*80 + "\n")
-        for model in MODELS:
+        for model in sorted(MODEL_CONFIGS.keys()):
             if model in by_model:
                 f.write(f"\n{model}:\n")
                 for dataset, status in sorted(by_model[model].items()):
