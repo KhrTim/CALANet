@@ -139,37 +139,30 @@ max_f1 = 0
 weighted_avg_f1 = 0
 
 
-# TODO: Wrap training loop with metrics_collector.track_training()
-# Example:
-# with metrics_collector.track_training():
-#     for epoch in range(epoches):
-#         with metrics_collector.track_training_epoch():
-#             train_loss, train_acc = train(...)
-#         metrics_collector.record_epoch_metrics(train_loss=train_loss, val_loss=val_loss,
-#                                               train_acc=train_acc, val_acc=val_acc)
-
-for epoch in range(epoches):
+# Track training time
+with metrics_collector.track_training():
+    for epoch in range(epoches):
     
-    # training
-    train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+        # training
+        train_loss, train_acc = train(train_queue, model, criterion, optimizer)
 
-    # evaluating
-    eval_loss, y_pred = infer(eval_queue, model, criterion)
-    results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
-    weighted_avg_f1 = results['weighted avg']['f1-score']
-    if (epoch+1) % 50 == 0:
-        print('training... ', epoch+1)
-    if max_f1 < weighted_avg_f1:
-        #torch.save(model.state_dict(), 'RNNs/save/'+dataset+'.pt')
-        print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
-        max_f1 = weighted_avg_f1
-        print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
-        if dataset=='UniMiB-SHAR':
-            print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)))['weighted avg']['f1-score'])
-            print('Falls:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)))['weighted avg']['f1-score'])
-        elif dataset=='PAMAP2':
-            print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17])['weighted avg']['f1-score'])
-            print('Complex:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16])['weighted avg']['f1-score'])
+        # evaluating
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
+        weighted_avg_f1 = results['weighted avg']['f1-score']
+        if (epoch+1) % 50 == 0:
+            print('training... ', epoch+1)
+        if max_f1 < weighted_avg_f1:
+            #torch.save(model.state_dict(), 'RNNs/save/'+dataset+'.pt')
+            print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
+            max_f1 = weighted_avg_f1
+            print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
+            if dataset=='UniMiB-SHAR':
+                print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)))['weighted avg']['f1-score'])
+                print('Falls:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)))['weighted avg']['f1-score'])
+            elif dataset=='PAMAP2':
+                print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17])['weighted avg']['f1-score'])
+                print('Complex:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16])['weighted avg']['f1-score'])
         
  
 
@@ -186,22 +179,40 @@ print("\n" + "="*70)
 print("COLLECTING COMPREHENSIVE METRICS")
 print("="*70)
 
-# TODO: Wrap inference with metrics_collector.track_inference()
-# Example:
-# with metrics_collector.track_inference():
-#     eval_loss, y_pred = infer(eval_queue, model, criterion)
+# Track inference time
+with metrics_collector.track_inference():
+    # Re-run inference for timing
+    if 'eval_queue' in locals():
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+    elif 'test_queue' in locals():
+        eval_loss, y_pred = infer(test_queue, model, criterion)
+    else:
+        y_pred = model(X_test_torch if 'X_test_torch' in locals() else torch.FloatTensor(X_test).to(device))
 
-# TODO: Add these lines after getting predictions:
-# y_pred_labels = np.argmax(y_pred, axis=1) if len(y_pred.shape) > 1 else y_pred
-# metrics_collector.compute_throughput(len(y_test_unary), phase='inference')
-# metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
-#
-# # Compute model complexity
-# input_shape = (1, input_nc, segment_size)
-# if input_shape is not None:
-#     metrics_collector.compute_model_complexity(model, input_shape, device='cuda')
-#
-# # Save comprehensive metrics
-# metrics_collector.save_metrics()
-# metrics_collector.print_summary()
+# Compute throughput
+test_samples = len(y_test_unary) if 'y_test_unary' in locals() else (len(test_Y) if 'test_Y' in locals() else (len(y_test) if 'y_test' in locals() else len(eval_data)))
+metrics_collector.compute_throughput(test_samples, phase='inference')
+
+# Compute classification metrics
+if hasattr(y_pred, 'cpu'):
+    y_pred_np = y_pred.cpu().numpy() if hasattr(y_pred, 'cpu') else y_pred
+else:
+    y_pred_np = y_pred
+
+y_pred_labels = np.argmax(y_pred_np, axis=1) if len(y_pred_np.shape) > 1 else y_pred_np
+
+y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test_Y' in locals() else y_test)
+metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
+
+# Compute model complexity
+input_shape = (1, input_nc, segment_size)
+if input_shape is not None:
+    try:
+        metrics_collector.compute_model_complexity(model, input_shape, device=device if 'device' in locals() else 'cuda')
+    except Exception as e:
+        print(f"Could not compute model complexity: {e}")
+
+# Save comprehensive metrics
+metrics_collector.save_metrics()
+metrics_collector.print_summary()
 

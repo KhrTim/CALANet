@@ -113,6 +113,14 @@ print(f"Atom length: {atom_length}")
 X_train_torch = torch.FloatTensor(X_train).to(device)
 X_test_torch = torch.FloatTensor(X_test).to(device)
 
+# Initialize metrics collector
+metrics_collector = MetricsCollector(
+    model_name='GTWIDL',
+    dataset=dataset,
+    task_type='TSC',
+    save_dir='results'
+)
+
 # Create GTWIDL model
 print("\nTraining GTWIDL Dictionary...")
 gtwidl_model = GTWIDL(
@@ -136,27 +144,36 @@ if len(X_train_torch) > max_samples_for_dict:
 else:
     X_train_dict = X_train_torch
 
-dictionary, alphas_train, betas_train = gtwidl_model.fit(X_train_dict)
+# Track training time for dictionary learning and classification
+with metrics_collector.track_training():
+    dictionary, alphas_train, betas_train = gtwidl_model.fit(X_train_dict)
 
-print("\nDictionary learning completed!")
+    print("\nDictionary learning completed!")
 
-# Create classifier
-print("\nTraining SVM Classifier on GTWIDL features...")
-classifier = GTWIDLClassifier(
-    gtwidl_model=gtwidl_model,
-    classifier_type='svm',
-    classifier_params={'random_state': seed}
-)
+    # Create classifier
+    print("\nTraining SVM Classifier on GTWIDL features...")
+    classifier = GTWIDLClassifier(
+        gtwidl_model=gtwidl_model,
+        classifier_type='svm',
+        classifier_params={'random_state': seed}
+    )
 
-# Train classifier on full training set
-classifier.fit(X_train_torch, y_train)
+    # Train classifier on full training set
+    classifier.fit(X_train_torch, y_train)
 
 # Evaluate
 print("\nEvaluating on test set...")
-test_metrics = classifier.evaluate(X_test_torch, y_test, verbose=False)
 
-# Get predictions for detailed metrics
-y_pred = classifier.predict(X_test_torch)
+# Track inference time
+with metrics_collector.track_inference():
+    test_metrics = classifier.evaluate(X_test_torch, y_test, verbose=False)
+    y_pred = classifier.predict(X_test_torch)
+
+# Compute throughput
+metrics_collector.compute_throughput(len(X_test), phase='inference')
+
+# Compute classification metrics
+metrics_collector.compute_classification_metrics(y_test, y_pred)
 
 # Compute additional metrics
 f1_weighted = f1_score(y_test, y_pred, average='weighted')
@@ -187,29 +204,18 @@ with open(f'codes/GTWIDL/results/{dataset}_gtwidl_results.txt', 'w') as f:
 print(f"\nResults saved to codes/GTWIDL/results/{dataset}_gtwidl_results.txt")
 
 
-# ============================================================================
-# COMPREHENSIVE METRICS COLLECTION
-# ============================================================================
+# Save comprehensive metrics using MetricsCollector
 print("\n" + "="*70)
-print("COLLECTING COMPREHENSIVE METRICS")
+print("SAVING COMPREHENSIVE METRICS")
 print("="*70)
 
-# TODO: Wrap inference with metrics_collector.track_inference()
-# Example:
-# with metrics_collector.track_inference():
-#     eval_loss, y_pred = infer(eval_queue, model, criterion)
+# Metrics were already collected during inference tracking above
+# Just need to add GTWIDL-specific metrics
+num_params = n_atoms * atom_length * input_nc
+metrics_collector.add_custom_metric('efficiency', 'dictionary_atoms', n_atoms)
+metrics_collector.add_custom_metric('efficiency', 'atom_length', atom_length)
+metrics_collector.add_custom_metric('efficiency', 'estimated_parameters', num_params)
 
-# TODO: Add these lines after getting predictions:
-# y_pred_labels = np.argmax(y_pred, axis=1) if len(y_pred.shape) > 1 else y_pred
-# metrics_collector.compute_throughput(len(y_test_unary), phase='inference')
-# metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
-#
-# # Compute model complexity
-# input_shape = None  # Dictionary-based model
-# if input_shape is not None:
-#     metrics_collector.compute_model_complexity(model, input_shape, device='cuda')
-#
-# # Save comprehensive metrics
-# metrics_collector.save_metrics()
-# metrics_collector.print_summary()
+metrics_collector.save_metrics()
+metrics_collector.print_summary()
 

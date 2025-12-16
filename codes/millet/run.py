@@ -179,22 +179,40 @@ print("\n" + "="*70)
 print("COLLECTING COMPREHENSIVE METRICS")
 print("="*70)
 
-# TODO: Wrap inference with metrics_collector.track_inference()
-# Example:
-# with metrics_collector.track_inference():
-#     eval_loss, y_pred = infer(eval_queue, model, criterion)
+# Track inference time
+with metrics_collector.track_inference():
+    # Re-run inference for timing
+    if 'eval_queue' in locals():
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+    elif 'test_queue' in locals():
+        eval_loss, y_pred = infer(test_queue, model, criterion)
+    else:
+        y_pred = model(X_test_torch if 'X_test_torch' in locals() else torch.FloatTensor(X_test).to(device))
 
-# TODO: Add these lines after getting predictions:
-# y_pred_labels = np.argmax(y_pred, axis=1) if len(y_pred.shape) > 1 else y_pred
-# metrics_collector.compute_throughput(len(y_test_unary), phase='inference')
-# metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
-#
-# # Compute model complexity
-# input_shape = (1, input_nc, segment_size)
-# if input_shape is not None:
-#     metrics_collector.compute_model_complexity(model, input_shape, device='cuda')
-#
-# # Save comprehensive metrics
-# metrics_collector.save_metrics()
-# metrics_collector.print_summary()
+# Compute throughput
+test_samples = len(y_test_unary) if 'y_test_unary' in locals() else (len(test_Y) if 'test_Y' in locals() else (len(y_test) if 'y_test' in locals() else len(eval_data)))
+metrics_collector.compute_throughput(test_samples, phase='inference')
+
+# Compute classification metrics
+if hasattr(y_pred, 'cpu'):
+    y_pred_np = y_pred.cpu().numpy() if hasattr(y_pred, 'cpu') else y_pred
+else:
+    y_pred_np = y_pred
+
+y_pred_labels = np.argmax(y_pred_np, axis=1) if len(y_pred_np.shape) > 1 else y_pred_np
+
+y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test_Y' in locals() else y_test)
+metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
+
+# Compute model complexity
+input_shape = (1, input_nc, segment_size)
+if input_shape is not None:
+    try:
+        metrics_collector.compute_model_complexity(model, input_shape, device=device if 'device' in locals() else 'cuda')
+    except Exception as e:
+        print(f"Could not compute model complexity: {e}")
+
+# Save comprehensive metrics
+metrics_collector.save_metrics()
+metrics_collector.print_summary()
 
