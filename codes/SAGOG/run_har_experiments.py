@@ -46,6 +46,12 @@ sagog_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sagog_utils)
 EarlyStopping = sagog_utils.EarlyStopping
 
+# Import shared metrics collector
+spec = importlib.util.spec_from_file_location("shared_metrics", os.path.join(codes_dir, 'shared_metrics.py'))
+shared_metrics = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(shared_metrics)
+MetricsCollector = shared_metrics.MetricsCollector
+
 # Configuration
 epoches = 500  # Original paper configuration
 batch_size = 128
@@ -161,6 +167,14 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
 # Early stopping
 early_stopping = EarlyStopping(patience=early_stopping_patience, mode='max')
 
+# Initialize metrics collector
+metrics_collector = MetricsCollector(
+    model_name='SAGOG',
+    dataset=dataset,
+    task_type='HAR',
+    save_dir='results'
+)
+
 # Training function
 def train(train_queue, model, criterion, optimizer):
     cl_loss = AvgrageMeter()
@@ -213,48 +227,60 @@ max_f1 = 0
 weighted_avg_f1 = 0
 best_epoch = 0
 
-for epoch in range(epoches):
-    # Training
-    train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+# Start tracking training time
+with metrics_collector.track_training():
+    for epoch in range(epoches):
+        # Track each epoch
+        with metrics_collector.track_training_epoch():
+            # Training
+            train_loss, train_acc = train(train_queue, model, criterion, optimizer)
 
-    # Evaluation
-    eval_loss, y_pred = infer(eval_queue, model, criterion)
-    results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, zero_division=0)
-    weighted_avg_f1 = results['weighted avg']['f1-score']
+        # Evaluation
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, zero_division=0)
+        weighted_avg_f1 = results['weighted avg']['f1-score']
 
-    # Update learning rate
-    scheduler.step(eval_loss)
+        # Record epoch metrics
+        metrics_collector.record_epoch_metrics(
+            train_loss=train_loss,
+            val_loss=eval_loss,
+            train_acc=train_acc,
+            val_acc=results['accuracy']
+        )
 
-    if (epoch+1) % 50 == 0:
-        print(f'Training... epoch {epoch+1}')
+        # Update learning rate
+        scheduler.step(eval_loss)
 
-    if max_f1 < weighted_avg_f1:
-        # Save best model
-        os.makedirs('SAGOG/save', exist_ok=True)
-        torch.save(model.state_dict(), f'SAGOG/save/{dataset}_sagog.pt')
+        if (epoch+1) % 50 == 0:
+            print(f'Training... epoch {epoch+1}')
 
-        print(f"Epoch {epoch+1}, loss {eval_loss:.4e}, weighted f1 {weighted_avg_f1:.4f}, best_f1 {max_f1:.4f}")
-        max_f1 = weighted_avg_f1
-        best_epoch = epoch + 1
+        if max_f1 < weighted_avg_f1:
+            # Save best model
+            os.makedirs('SAGOG/save', exist_ok=True)
+            torch.save(model.state_dict(), f'SAGOG/save/{dataset}_sagog.pt')
 
-        print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, zero_division=0))
+            print(f"Epoch {epoch+1}, loss {eval_loss:.4e}, weighted f1 {weighted_avg_f1:.4f}, best_f1 {max_f1:.4f}")
+            max_f1 = weighted_avg_f1
+            best_epoch = epoch + 1
 
-        # Dataset-specific metrics (matching CALANet output)
-        if dataset == 'UniMiB-SHAR':
-            adl_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)), zero_division=0)['weighted avg']['f1-score']
-            falls_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)), zero_division=0)['weighted avg']['f1-score']
-            print(f'ADL: {adl_f1:.4f}')
-            print(f'Falls: {falls_f1:.4f}')
-        elif dataset == 'PAMAP2':
-            adl_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17], zero_division=0)['weighted avg']['f1-score']
-            complex_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16], zero_division=0)['weighted avg']['f1-score']
-            print(f'ADL: {adl_f1:.4f}')
-            print(f'Complex: {complex_f1:.4f}')
+            print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, zero_division=0))
 
-    # Early stopping check
-    if early_stopping(weighted_avg_f1):
-        print(f"\nEarly stopping triggered at epoch {epoch+1}")
-        break
+            # Dataset-specific metrics (matching CALANet output)
+            if dataset == 'UniMiB-SHAR':
+                adl_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)), zero_division=0)['weighted avg']['f1-score']
+                falls_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)), zero_division=0)['weighted avg']['f1-score']
+                print(f'ADL: {adl_f1:.4f}')
+                print(f'Falls: {falls_f1:.4f}')
+            elif dataset == 'PAMAP2':
+                adl_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17], zero_division=0)['weighted avg']['f1-score']
+                complex_f1 = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16], zero_division=0)['weighted avg']['f1-score']
+                print(f'ADL: {adl_f1:.4f}')
+                print(f'Complex: {complex_f1:.4f}')
+
+        # Early stopping check
+        if early_stopping(weighted_avg_f1):
+            print(f"\nEarly stopping triggered at epoch {epoch+1}")
+            break
 
 print("\n" + "="*70)
 print("Training Completed!")
@@ -264,8 +290,22 @@ print(f"Best F1 Score: {max_f1:.4f} at epoch {best_epoch}")
 # Load best model and evaluate
 print("\nLoading best model for final evaluation...")
 model.load_state_dict(torch.load(f'SAGOG/save/{dataset}_sagog.pt'))
-eval_loss, y_pred = infer(eval_queue, model, criterion)
+
+# Track inference time
+with metrics_collector.track_inference():
+    eval_loss, y_pred = infer(eval_queue, model, criterion)
+
 y_pred_labels = np.argmax(y_pred, axis=1)
+
+# Compute throughput
+metrics_collector.compute_throughput(len(eval_data), phase='inference')
+
+# Compute classification metrics
+metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
+
+# Compute model complexity (parameters and FLOPs)
+input_shape = (1, input_nc, 1, segment_size)  # SAGoG input format
+metrics_collector.compute_model_complexity(model, input_shape, device=device)
 
 # Final metrics
 results = classification_report(y_test_unary, y_pred_labels, digits=4, output_dict=True, zero_division=0)
@@ -292,3 +332,10 @@ with open(f'SAGOG/results/{dataset}_sagog_results.txt', 'w') as f:
     f.write(classification_report(y_test_unary, y_pred_labels, digits=4, zero_division=0))
 
 print(f"\nResults saved to SAGOG/results/{dataset}_sagog_results.txt")
+
+# Save comprehensive metrics using MetricsCollector
+print("\n" + "="*70)
+print("SAVING COMPREHENSIVE METRICS")
+print("="*70)
+metrics_collector.save_metrics()
+metrics_collector.print_summary()
