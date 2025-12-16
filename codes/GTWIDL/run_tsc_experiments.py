@@ -33,6 +33,16 @@ os.chdir(project_root)
 from gtwidl import GTWIDL
 from classification import GTWIDLClassifier
 
+# Import shared metrics collector
+import importlib.util
+codes_dir_for_metrics = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+spec = importlib.util.spec_from_file_location("shared_metrics",
+                                              os.path.join(codes_dir_for_metrics, 'shared_metrics.py'))
+shared_metrics = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(shared_metrics)
+MetricsCollector = shared_metrics.MetricsCollector
+
+
 # Configuration
 seed = 243
 n_atoms = 10  # Reduced for faster training (50% of original 20)
@@ -175,3 +185,31 @@ with open(f'codes/GTWIDL/results/{dataset}_gtwidl_results.txt', 'w') as f:
     f.write(classification_report(y_test, y_pred, digits=4))
 
 print(f"\nResults saved to codes/GTWIDL/results/{dataset}_gtwidl_results.txt")
+
+
+# ============================================================================
+# COMPREHENSIVE METRICS COLLECTION
+# ============================================================================
+print("\n" + "="*70)
+print("COLLECTING COMPREHENSIVE METRICS")
+print("="*70)
+
+# TODO: Wrap inference with metrics_collector.track_inference()
+# Example:
+# with metrics_collector.track_inference():
+#     eval_loss, y_pred = infer(eval_queue, model, criterion)
+
+# TODO: Add these lines after getting predictions:
+# y_pred_labels = np.argmax(y_pred, axis=1) if len(y_pred.shape) > 1 else y_pred
+# metrics_collector.compute_throughput(len(y_test_unary), phase='inference')
+# metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
+#
+# # Compute model complexity
+# input_shape = None  # Dictionary-based model
+# if input_shape is not None:
+#     metrics_collector.compute_model_complexity(model, input_shape, device='cuda')
+#
+# # Save comprehensive metrics
+# metrics_collector.save_metrics()
+# metrics_collector.print_summary()
+

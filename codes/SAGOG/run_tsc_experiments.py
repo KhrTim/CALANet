@@ -39,6 +39,16 @@ from sagog_model import SAGoG
 
 # Import EarlyStopping from SAGOG's utils
 import importlib.util
+
+# Import shared metrics collector
+import importlib.util
+codes_dir_for_metrics = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+spec = importlib.util.spec_from_file_location("shared_metrics",
+                                              os.path.join(codes_dir_for_metrics, 'shared_metrics.py'))
+shared_metrics = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(shared_metrics)
+MetricsCollector = shared_metrics.MetricsCollector
+
 spec = importlib.util.spec_from_file_location("sagog_utils", os.path.join(current_dir, "utils.py"))
 sagog_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sagog_utils)
@@ -194,6 +204,14 @@ scheduler = optim.lr_scheduler.ReduceLROnPlateau(
 # Early stopping
 early_stopping = EarlyStopping(patience=early_stopping_patience, mode='max')
 
+# Initialize metrics collector
+metrics_collector = MetricsCollector(
+    model_name='SAGOG',
+    dataset=dataset,
+    task_type='TSC',
+    save_dir='results'
+)
+
 # Training function
 def train(train_queue, model, criterion, optimizer):
     cl_loss = AvgrageMeter()
@@ -246,36 +264,48 @@ max_acc = 0
 best_acc = 0
 best_epoch = 0
 
-for epoch in range(epoches):
-    # Training
-    train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+# Start tracking training time
+with metrics_collector.track_training():
+    for epoch in range(epoches):
+        # Track each epoch
+        with metrics_collector.track_training_epoch():
+            # Training
+            train_loss, train_acc = train(train_queue, model, criterion, optimizer)
 
-    # Evaluation
-    eval_loss, y_pred = infer(eval_queue, model, criterion)
-    y_pred_labels = np.argmax(y_pred, axis=1)
-    test_acc = accuracy_score(test_Y, y_pred_labels)
+        # Evaluation
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        y_pred_labels = np.argmax(y_pred, axis=1)
+        test_acc = accuracy_score(test_Y, y_pred_labels)
 
-    # Update learning rate
-    scheduler.step(eval_loss)
+        # Record epoch metrics
+        metrics_collector.record_epoch_metrics(
+            train_loss=train_loss,
+            val_loss=eval_loss,
+            train_acc=train_acc,
+            val_acc=test_acc
+        )
 
-    if (epoch+1) % 50 == 0:
-        print(f'Training... epoch {epoch+1}')
+        # Update learning rate
+        scheduler.step(eval_loss)
 
-    if max_acc < test_acc:
-        # Save best model
-        os.makedirs('codes/SAGOG/save', exist_ok=True)
-        torch.save(model.state_dict(), f'codes/SAGOG/save/{dataset}_sagog.pt')
+        if (epoch+1) % 50 == 0:
+            print(f'Training... epoch {epoch+1}')
 
-        print(f"Epoch {epoch+1}, loss {eval_loss:.4e}, accuracy {test_acc:.4f}, best_acc {max_acc:.4f}")
-        max_acc = test_acc
-        best_epoch = epoch + 1
+        if max_acc < test_acc:
+            # Save best model
+            os.makedirs('codes/SAGOG/save', exist_ok=True)
+            torch.save(model.state_dict(), f'codes/SAGOG/save/{dataset}_sagog.pt')
 
-        print(classification_report(test_Y, y_pred_labels, digits=4, zero_division=0))
+            print(f"Epoch {epoch+1}, loss {eval_loss:.4e}, accuracy {test_acc:.4f}, best_acc {max_acc:.4f}")
+            max_acc = test_acc
+            best_epoch = epoch + 1
 
-    # Early stopping check
-    if early_stopping(test_acc):
-        print(f"\nEarly stopping triggered at epoch {epoch+1}")
-        break
+            print(classification_report(test_Y, y_pred_labels, digits=4, zero_division=0))
+
+        # Early stopping check
+        if early_stopping(test_acc):
+            print(f"\nEarly stopping triggered at epoch {epoch+1}")
+            break
 
 print("\n" + "="*70)
 print("Training Completed!")
@@ -285,8 +315,22 @@ print(f"Best Accuracy: {max_acc:.4f} at epoch {best_epoch}")
 # Load best model and evaluate
 print("\nLoading best model for final evaluation...")
 model.load_state_dict(torch.load(f'codes/SAGOG/save/{dataset}_sagog.pt'))
-eval_loss, y_pred = infer(eval_queue, model, criterion)
+
+# Track inference time
+with metrics_collector.track_inference():
+    eval_loss, y_pred = infer(eval_queue, model, criterion)
+
 y_pred_labels = np.argmax(y_pred, axis=1)
+
+# Compute throughput
+metrics_collector.compute_throughput(len(test_data), phase='inference')
+
+# Compute classification metrics
+metrics_collector.compute_classification_metrics(test_Y, y_pred_labels)
+
+# Compute model complexity (parameters and FLOPs)
+input_shape = (1, input_nc, 1, segment_size)  # SAGoG input format
+metrics_collector.compute_model_complexity(model, input_shape, device=device)
 
 # Final metrics
 results = classification_report(test_Y, y_pred_labels, digits=4, output_dict=True, zero_division=0)
@@ -313,3 +357,11 @@ with open(f'codes/SAGOG/results/{dataset}_sagog_results.txt', 'w') as f:
     f.write(classification_report(test_Y, y_pred_labels, digits=4, zero_division=0))
 
 print(f"\nResults saved to codes/SAGOG/results/{dataset}_sagog_results.txt")
+
+# Save comprehensive metrics using MetricsCollector
+print("\n" + "="*70)
+print("SAVING COMPREHENSIVE METRICS")
+print("="*70)
+metrics_collector.save_metrics()
+metrics_collector.print_summary()
+

@@ -34,6 +34,16 @@ os.chdir(project_root)
 
 # Now import from CALANet utils (will be named calanet_utils to avoid conflicts)
 import importlib.util
+
+# Import shared metrics collector
+import importlib.util
+codes_dir_for_metrics = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+spec = importlib.util.spec_from_file_location("shared_metrics",
+                                              os.path.join(codes_dir_for_metrics, 'shared_metrics.py'))
+shared_metrics = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(shared_metrics)
+MetricsCollector = shared_metrics.MetricsCollector
+
 spec = importlib.util.spec_from_file_location("calanet_utils", os.path.join(codes_dir, 'CALANet_local/utils.py'))
 calanet_utils = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(calanet_utils)
@@ -165,6 +175,14 @@ model.apply(weight_init)
 # Create optimizer and loss
 criterion = nn.CrossEntropyLoss().to(device)
 optimizer = torch.optim.Adam(
+
+# Initialize metrics collector
+metrics_collector = MetricsCollector(
+    model_name='MPTSNet',
+    dataset=dataset,
+    task_type='HAR',
+    save_dir='results'
+)
     model.parameters(),
     lr=learning_rate,
     weight_decay=weight_decay
@@ -234,6 +252,16 @@ weighted_avg_f1 = 0
 best_epoch = 0
 patience_counter = 0
 lr_history = []
+
+
+# TODO: Wrap training loop with metrics_collector.track_training()
+# Example:
+# with metrics_collector.track_training():
+#     for epoch in range(epoches):
+#         with metrics_collector.track_training_epoch():
+#             train_loss, train_acc = train(...)
+#         metrics_collector.record_epoch_metrics(train_loss=train_loss, val_loss=val_loss,
+#                                               train_acc=train_acc, val_acc=val_acc)
 
 for epoch in range(epoches):
     # Training
@@ -323,3 +351,31 @@ with open(f'MPTSNet/results/{dataset}_mptsnet_results.txt', 'w') as f:
     f.write(classification_report(y_test_unary, y_pred_labels, digits=4, zero_division=0))
 
 print(f"\nResults saved to MPTSNet/results/{dataset}_mptsnet_results.txt")
+
+
+# ============================================================================
+# COMPREHENSIVE METRICS COLLECTION
+# ============================================================================
+print("\n" + "="*70)
+print("COLLECTING COMPREHENSIVE METRICS")
+print("="*70)
+
+# TODO: Wrap inference with metrics_collector.track_inference()
+# Example:
+# with metrics_collector.track_inference():
+#     eval_loss, y_pred = infer(eval_queue, model, criterion)
+
+# TODO: Add these lines after getting predictions:
+# y_pred_labels = np.argmax(y_pred, axis=1) if len(y_pred.shape) > 1 else y_pred
+# metrics_collector.compute_throughput(len(y_test_unary), phase='inference')
+# metrics_collector.compute_classification_metrics(y_test_unary, y_pred_labels)
+#
+# # Compute model complexity
+# input_shape = (1, segment_size, input_nc)
+# if input_shape is not None:
+#     metrics_collector.compute_model_complexity(model, input_shape, device='cuda')
+#
+# # Save comprehensive metrics
+# metrics_collector.save_metrics()
+# metrics_collector.print_summary()
+
