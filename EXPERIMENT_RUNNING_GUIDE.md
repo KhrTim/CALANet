@@ -3,12 +3,30 @@
 Complete guide for running experiments with comprehensive metrics collection.
 
 ## Table of Contents
+- [Prerequisites](#prerequisites)
 - [Quick Start](#quick-start)
 - [Single Experiment](#single-experiment)
 - [Batch Experiments](#batch-experiments)
 - [Parallel Experiments (Recommended)](#parallel-experiments-recommended)
 - [Results Location](#results-location)
 - [Monitoring Progress](#monitoring-progress)
+
+---
+
+## Prerequisites
+
+**Python Environment:**
+The experiments require PyTorch 2.0+ with CUDA support. If you're using conda:
+
+```bash
+# Activate the rthar environment (or your PyTorch environment)
+conda activate rthar
+
+# Verify PyTorch is available
+python -c "import torch; print(f'PyTorch {torch.__version__} CUDA: {torch.cuda.is_available()}')"
+```
+
+**Note:** The parallel runner automatically uses `/userHome/userhome1/timur/miniconda3/envs/rthar/bin/python` if available.
 
 ---
 

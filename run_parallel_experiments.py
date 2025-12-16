@@ -116,9 +116,15 @@ def worker(task_queue, result_queue, gpu_id):
             # No timeout for any model - let all experiments run to completion
             timeout_seconds = None
 
+            # Use the rthar conda environment Python (has PyTorch installed)
+            python_executable = '/userHome/userhome1/timur/miniconda3/envs/rthar/bin/python'
+            if not os.path.exists(python_executable):
+                # Fallback to sys.executable if rthar env doesn't exist
+                python_executable = sys.executable
+
             # Run experiment from project root
             result = subprocess.run(
-                [sys.executable, temp_script],
+                [python_executable, temp_script],
                 env=env,
                 capture_output=True,
                 text=True,
@@ -134,7 +140,7 @@ def worker(task_queue, result_queue, gpu_id):
             log_dir = f"logs_{dataset_type.lower()}/{model}"
             os.makedirs(log_dir, exist_ok=True)
             with open(f"{log_dir}/{dataset}_log.txt", 'w') as f:
-                f.write(f"Command: python {temp_script}\n")
+                f.write(f"Command: {python_executable} {temp_script}\n")
                 f.write(f"GPU: {gpu_id}\n")
                 f.write(f"Duration: {elapsed:.1f}s\n")
                 f.write(f"Exit Code: {result.returncode}\n\n")
