@@ -167,6 +167,7 @@ with metrics_collector.track_training():
             print('training... ', epoch+1)
         if max_f1 < weighted_avg_f1:
             if weighted_avg_f1 < 0.88:
+                os.makedirs('DSN-master/save', exist_ok=True)
                 torch.save(model.state_dict(), 'DSN-master/save/'+dataset + memo + '.pt')
             print("epoch %d, weighted f1 %f, best_f1 %f" % (epoch+1,  weighted_avg_f1, max_f1))
             max_f1 = weighted_avg_f1

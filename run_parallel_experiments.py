@@ -20,7 +20,7 @@ TSC_DATASETS = ["AtrialFibrillation", "MotorImagery", "Heartbeat", "PhonemeSpect
 MODEL_CONFIGS = {
     # Main models
     "SAGOG": {"har": "codes/SAGOG/run_har_experiments.py", "tsc": "codes/SAGOG/run_tsc_experiments.py"},
-    "GTWIDL": {"har": "codes/GTWIDL/run_har_experiments.py", "tsc": "codes/GTWIDL/run_tsc_experiments.py"},
+    # "GTWIDL": {"har": "codes/GTWIDL/run_har_experiments.py", "tsc": "codes/GTWIDL/run_tsc_experiments.py"},  # EXCLUDED: Takes too long
     "MPTSNet": {"har": "codes/MPTSNet/run_har_experiments.py", "tsc": "codes/MPTSNet/run_tsc_experiments.py"},
     "MSDL": {"har": "codes/MSDL/run_har_experiments.py", "tsc": "codes/MSDL/run_tsc_experiments.py"},
 
