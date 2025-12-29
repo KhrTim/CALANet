@@ -19,7 +19,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from utils import input_pipeline, count_parameters_in_MB, AvgrageMeter, accuracy, save, data_info
 from models import If_ConvTransformer
 import torch.nn.functional as F
-from contiguous_params import ContiguousParams
+# from contiguous_params import ContiguousParams  # Module not available, using standard parameters
 
 # Import shared metrics collector
 import importlib.util
@@ -140,8 +140,9 @@ model = If_ConvTransformer(1, input_nc+3, 64, 5, 3,2, 128, 1, 0.2, segment_size,
 #model.apply(weight_init)
 print("param size = %fMB" % count_parameters_in_MB(model))
 
-parameters = ContiguousParams(model.parameters())
-optimizer = torch.optim.Adam(parameters.contiguous(),lr = 0.0002)
+# parameters = ContiguousParams(model.parameters())
+# optimizer = torch.optim.Adam(parameters.contiguous(),lr = 0.0002)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.0002)  # Using standard parameters
 
 # Initialize metrics collector
 metrics_collector = MetricsCollector(

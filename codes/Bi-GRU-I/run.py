@@ -152,6 +152,7 @@ with metrics_collector.track_training():
         if (epoch+1) % 50 == 0:
             print('training... ', epoch+1)
         if max_f1 < weighted_avg_f1:
+            os.makedirs('Bi-GRU-I/save', exist_ok=True)
             torch.save(model.state_dict(), 'Bi-GRU-I/save/'+dataset+'.pt')
             print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
             max_f1 = weighted_avg_f1

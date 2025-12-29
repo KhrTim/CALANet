@@ -199,9 +199,9 @@ print("="*70)
 with metrics_collector.track_inference():
     # Re-run inference for timing
     if 'eval_queue' in locals():
-        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        y_pred = infer(eval_queue, model)
     elif 'test_queue' in locals():
-        eval_loss, y_pred = infer(test_queue, model, criterion)
+        y_pred = infer(test_queue, model)
     else:
         y_pred = model(X_test_torch if 'X_test_torch' in locals() else torch.FloatTensor(X_test).to(device))
 
