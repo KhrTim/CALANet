@@ -123,7 +123,19 @@ class MILLETModel:
         loss = criterion(all_bag_logits, all_targets).item()
         acc = accuracy_score(all_targets.long(), all_pred_clzs)
         bal_acc = balanced_accuracy_score(all_targets.long(), all_pred_clzs)
-        auroc = roc_auc_score(all_targets, all_pred_probas, multi_class="ovo", average="weighted")
+
+        # Try to compute AUROC, handle NaN gracefully
+        try:
+            # Check for NaN in predictions
+            if torch.isnan(all_pred_probas).any():
+                print("Warning: NaN values detected in predictions, setting AUROC to 0.0")
+                auroc = 0.0
+            else:
+                auroc = roc_auc_score(all_targets, all_pred_probas, multi_class="ovo", average="weighted")
+        except (ValueError, RuntimeError) as e:
+            print(f"Warning: Could not compute AUROC: {e}, setting to 0.0")
+            auroc = 0.0
+
         conf_mat = torch.as_tensor(confusion_matrix(all_targets, all_pred_clzs), dtype=torch.float)
         
         

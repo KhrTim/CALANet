@@ -39,8 +39,14 @@ epoches = 500
 batch_size = 128
 seed = 4
 
-
+# Dataset selection (uncomment the one you want to run)
+#dataset = "AtrialFibrillation"
+#dataset = "MotorImagery"
+#dataset = "Heartbeat"
+#dataset = "PhonemeSpectra"
+#dataset = "LSST"
 dataset = "PEMS-SF"
+
 DATA_PATH = os.path.join('Data', 'TSC', dataset)
 
 input_nc = 963
