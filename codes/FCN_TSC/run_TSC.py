@@ -37,18 +37,24 @@ epoches = 500
 batch_size = 128
 seed = 2
 
+# Dataset selection (uncomment the one you want to run)
+#dataset = "AtrialFibrillation"
+#dataset = "MotorImagery"
+#dataset = "Heartbeat"
+#dataset = "PhonemeSpectra"
+#dataset = "LSST"
 dataset = "PEMS-SF"
 DATA_PATH = os.path.join('Data', 'TSC', dataset)
-
-input_nc = 963
-class_num = 7
-
 
 train_X, train_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TRAIN.arff"))
 _, train_Y = np.unique(train_Y, return_inverse=True)
 
 test_X, test_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TEST.arff"))
 _, test_Y = np.unique(test_Y, return_inverse=True)
+
+# Infer input_nc and class_num from data
+input_nc = train_X.shape[1]
+class_num = len(np.unique(train_Y))
 
 train_data = To_DataSet(train_X, train_Y)
 test_data = To_DataSet(test_X, test_Y)

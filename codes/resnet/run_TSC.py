@@ -37,18 +37,24 @@ epoches = 500
 batch_size = 128
 seed = 2
 
-dataset = "PhonemeSpectra"
+# Dataset selection (uncomment the one you want to run)
+#dataset = "AtrialFibrillation"
+#dataset = "MotorImagery"
+#dataset = "Heartbeat"
+#dataset = "PhonemeSpectra"
+#dataset = "LSST"
+dataset = "PEMS-SF"
 DATA_PATH = os.path.join('Data', 'TSC', dataset)
-
-input_nc = 11
-class_num =39
-
 
 train_X, train_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TRAIN.arff"))
 _, train_Y = np.unique(train_Y, return_inverse=True)
 
 test_X, test_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TEST.arff"))
 _, test_Y = np.unique(test_Y, return_inverse=True)
+
+# Infer input_nc and class_num from data
+input_nc = train_X.shape[1]
+class_num = len(np.unique(train_Y))
 
 train_data = To_DataSet(train_X, train_Y)
 test_data = To_DataSet(test_X, test_Y)
@@ -131,6 +137,11 @@ model.apply(weight_init)
 print("param size = %fMB" % count_parameters_in_MB(model))
 
 optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=5e-4,
+    #betas=(0.5,0.9),
+    weight_decay=5e-4
+)
 
 # Initialize metrics collector
 metrics_collector = MetricsCollector(
@@ -138,11 +149,6 @@ metrics_collector = MetricsCollector(
     dataset=dataset,
     task_type='TSC',
     save_dir='results'
-)
-    model.parameters(),
-    lr=5e-4,
-    #betas=(0.5,0.9),
-    weight_decay=5e-4
 )
 max_acc = 0
 acc = 0
