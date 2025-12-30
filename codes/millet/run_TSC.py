@@ -200,29 +200,26 @@ print("\n" + "="*70)
 print("COLLECTING COMPREHENSIVE METRICS")
 print("="*70)
 
-# Track inference time
+# Track inference time and re-evaluate
 with metrics_collector.track_inference():
-    # Re-run inference for timing
-    if 'eval_queue' in locals():
-        eval_loss, y_pred = infer(eval_queue, model, criterion)
-    elif 'test_queue' in locals():
-        eval_loss, y_pred = infer(test_queue, model, criterion)
-    else:
-        y_pred = model(X_test_torch if 'X_test_torch' in locals() else torch.FloatTensor(X_test).to(device))
+    test_results_dict = model.evaluate(eval_queue)
+
+# Get predictions for metrics
+y_pred_labels = test_results_dict.get('y_pred', None)
+y_true_labels = test_results_dict.get('y_true', None)
+
+# If predictions not in results, get them separately
+if y_pred_labels is None or y_true_labels is None:
+    # Fallback: re-run evaluation to get predictions
+    test_results_dict = model.evaluate(eval_queue)
+    y_pred_labels = test_results_dict.get('y_pred', test_Y)
+    y_true_labels = test_Y
 
 # Compute throughput
-test_samples = len(y_test_unary) if 'y_test_unary' in locals() else (len(test_Y) if 'test_Y' in locals() else (len(y_test) if 'y_test' in locals() else len(eval_data)))
+test_samples = len(y_true_labels)
 metrics_collector.compute_throughput(test_samples, phase='inference')
 
 # Compute classification metrics
-if hasattr(y_pred, 'cpu'):
-    y_pred_np = y_pred.cpu().numpy() if hasattr(y_pred, 'cpu') else y_pred
-else:
-    y_pred_np = y_pred
-
-y_pred_labels = np.argmax(y_pred_np, axis=1) if len(y_pred_np.shape) > 1 else y_pred_np
-
-y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test_Y' in locals() else y_test)
 metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
 
 # Compute model complexity

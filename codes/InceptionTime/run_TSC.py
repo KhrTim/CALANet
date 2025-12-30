@@ -193,6 +193,7 @@ with metrics_collector.track_training():
         if (epoch+1) % 50 == 0:
             print('training... ', epoch+1)
         if max_acc < acc:
+            os.makedirs('CALANet_local/save/tsc', exist_ok=True)
             torch.save(model.state_dict(), 'CALANet_local/save/tsc/'+dataset + '.pt')
             print("epoch %d, loss %e, Acc %f, best_Acc %f" % (epoch+1, eval_loss, acc, max_acc))
             max_acc = acc
