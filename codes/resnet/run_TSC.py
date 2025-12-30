@@ -52,8 +52,9 @@ _, train_Y = np.unique(train_Y, return_inverse=True)
 test_X, test_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TEST.arff"))
 _, test_Y = np.unique(test_Y, return_inverse=True)
 
-# Infer input_nc and class_num from data
+# Infer input_nc, seq_len, and class_num from data
 input_nc = train_X.shape[1]
+seq_len = train_X.shape[2]
 class_num = len(np.unique(train_Y))
 
 train_data = To_DataSet(train_X, train_Y)
@@ -206,7 +207,7 @@ y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test
 metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
 
 # Compute model complexity
-input_shape = (1, input_nc, segment_size)
+input_shape = (1, input_nc, seq_len)
 if input_shape is not None:
     try:
         metrics_collector.compute_model_complexity(model, input_shape, device=device if 'device' in locals() else 'cuda')
