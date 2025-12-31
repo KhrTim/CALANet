@@ -149,7 +149,9 @@ class MILLETModel:
             "bal_acc": bal_acc,
             "auroc": auroc,
             "conf_mat": conf_mat,
-            "f1_score": f1
+            "f1_score": f1,
+            "y_pred": all_pred_clzs.cpu().numpy(),
+            "y_true": all_targets.cpu().numpy()
         }
         return all_results
 
