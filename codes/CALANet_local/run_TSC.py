@@ -24,7 +24,22 @@ from utils import input_pipeline, count_parameters_in_MB, AvgrageMeter, accuracy
 from models_standard import HTAggNet
 from sklearn import preprocessing
 
-dataset = "PhonemeSpectra"
+# Import shared metrics collector
+import importlib.util
+codes_dir_for_metrics = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+spec = importlib.util.spec_from_file_location("shared_metrics",
+                                              os.path.join(codes_dir_for_metrics, 'shared_metrics.py'))
+shared_metrics = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(shared_metrics)
+MetricsCollector = shared_metrics.MetricsCollector
+
+# Dataset selection (uncomment the one you want to run)
+#dataset = "AtrialFibrillation"
+#dataset = "MotorImagery"
+#dataset = "Heartbeat"
+#dataset = "PhonemeSpectra"
+#dataset = "LSST"
+dataset = "PEMS-SF"
 DATA_PATH = os.path.join('Data', 'TSC', dataset)
 
 epoches = 500
@@ -32,15 +47,16 @@ batch_size = 128
 seed = 2
 L = 8
 
-in_c = 11
-length = 217
-n_class = 39
-
 train_X, train_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TRAIN.arff"))
 _, train_Y = np.unique(train_Y, return_inverse=True)
 
 test_X, test_Y = load_from_arff_file(os.path.join(DATA_PATH, dataset + "_TEST.arff"))
 _, test_Y = np.unique(test_Y, return_inverse=True)
+
+# Infer dimensions from data
+in_c = train_X.shape[1]
+length = train_X.shape[2]
+n_class = len(np.unique(train_Y))
 
 ## normalizaiton
 # for i in range(in_c):
@@ -148,6 +164,14 @@ optimizer = torch.optim.Adam(
     eps=1e-08
 )
 
+# Initialize metrics collector
+metrics_collector = MetricsCollector(
+    model_name='CALANet',
+    dataset=dataset,
+    task_type='TSC',
+    save_dir='results'
+)
+
 max_acc = 0
 acc = 0
 
@@ -163,7 +187,43 @@ for epoch in range(epoches):
     if (epoch+1) % 50 == 0:
         print('training... ', epoch+1)
     if max_acc < acc:
+        os.makedirs('CALANet_local/save/tsc', exist_ok=True)
         torch.save(model.state_dict(), 'CALANet_local/save/tsc/'+dataset + '.pt')
         print("epoch %d, loss %e, Acc %f, best_Acc %f" % (epoch+1, eval_loss, acc, max_acc))
         max_acc = acc
         print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
+
+
+
+# ============================================================================
+# COMPREHENSIVE METRICS COLLECTION
+# ============================================================================
+print("\n" + "="*70)
+print("COLLECTING COMPREHENSIVE METRICS")
+print("="*70)
+
+# Track inference time
+with metrics_collector.track_inference():
+    # Re-run inference for timing
+    eval_loss, y_pred = infer(eval_queue, model, criterion)
+
+# Compute throughput
+test_samples = len(y_test_unary)
+metrics_collector.compute_throughput(test_samples, phase='inference')
+
+# Compute classification metrics
+y_pred_labels = np.argmax(y_pred, axis=1)
+y_true_labels = y_test_unary
+metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
+
+# Compute model complexity
+input_shape = (1, in_c, length)
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+try:
+    metrics_collector.compute_model_complexity(model, input_shape, device=device)
+except Exception as e:
+    print(f"Could not compute model complexity: {e}")
+
+# Save comprehensive metrics
+metrics_collector.save_metrics()
+metrics_collector.print_summary()

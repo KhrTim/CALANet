@@ -34,6 +34,7 @@ MODEL_CONFIGS = {
     # Both HAR and TSC
     "millet": {"har": "codes/millet/run.py", "tsc": "codes/millet/run_TSC.py"},
     "DSN": {"har": "codes/DSN-master/run.py", "tsc": "codes/DSN-master/run_TSC.py"},
+    "CALANet": {"har": "codes/CALANet_local/run.py", "tsc": "codes/CALANet_local/run_TSC.py"},
 
     # TSC-only baseline models
     "resnet": {"har": None, "tsc": "codes/resnet/run_TSC.py"},
