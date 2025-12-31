@@ -153,6 +153,7 @@ for epoch in range(epoches):
     if (epoch+1) % 50 == 0:
         print('training... ', epoch+1)
     if max_f1 < weighted_avg_f1:
+        os.makedirs('HT-AggNet_v2/save/with_gts', exist_ok=True)
         torch.save(model.state_dict(), 'HT-AggNet_v2/save/with_gts/'+dataset + memo + '.pt')
         print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
         max_f1 = weighted_avg_f1
