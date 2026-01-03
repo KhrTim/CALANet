@@ -404,7 +404,7 @@ y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test
 metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
 
 # Compute model complexity
-input_shape = (1, segment_size, input_nc)
+input_shape = (1, input_nc, segment_size)
 if input_shape is not None:
     try:
         metrics_collector.compute_model_complexity(model, input_shape, device=device if 'device' in locals() else 'cuda')

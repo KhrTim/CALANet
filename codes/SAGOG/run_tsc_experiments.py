@@ -329,7 +329,7 @@ metrics_collector.compute_throughput(len(test_data), phase='inference')
 metrics_collector.compute_classification_metrics(test_Y, y_pred_labels)
 
 # Compute model complexity (parameters and FLOPs)
-input_shape = (1, input_nc, 1, segment_size)  # SAGoG input format
+input_shape = (1, input_nc, segment_size)
 metrics_collector.compute_model_complexity(model, input_shape, device=device)
 
 # Final metrics

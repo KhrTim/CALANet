@@ -38,8 +38,8 @@ REALDISP:
 ================================================================================
 Failed Experiments:
 ================================================================================
+  IF-ConvTransformer2 on DSADS               : Unknown
   IF-ConvTransformer2 on OPPORTUNITY         : Unknown
   IF-ConvTransformer2 on PAMAP2              : Unknown
-  IF-ConvTransformer2 on DSADS               : Unknown
   IF-ConvTransformer2 on REALDISP            : Unknown
   millet     on REALDISP            : Unknown
