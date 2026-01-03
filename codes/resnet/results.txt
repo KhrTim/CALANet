@@ -1,0 +1,34 @@
+-------------------------OPPORTUNITY
+Depth 2
+acc: 0.626
+flops: 19.577
+
+Depth 3
+acc: 0.763
+flops: 40.313
+
+Depth 6
+acc: 0.806
+flops: 76.728
+
+Depth 9
+acc: 0.809
+flops: 96.865
+
+
+-------------------------REALDISP
+Depth 2
+acc: 0.934
+flops: 40.580
+
+Depth 3
+acc: 
+flops: 46.852
+
+Depth 6
+acc: 
+flops: 146.184
+
+Depth 9
+acc: 
+flops: 270.088

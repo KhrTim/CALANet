@@ -1,0 +1,45 @@
+Parallel Experiments Summary
+================================================================================
+
+Total: 5
+Success: 0
+Failed: 5
+
+================================================================================
+By Model:
+================================================================================
+
+IF-ConvTransformer2:
+  DSADS               : FAILED
+  OPPORTUNITY         : FAILED
+  PAMAP2              : FAILED
+  REALDISP            : FAILED
+
+millet:
+  REALDISP            : FAILED
+
+================================================================================
+By Dataset:
+================================================================================
+
+DSADS:
+  IF-ConvTransformer2: FAILED
+
+OPPORTUNITY:
+  IF-ConvTransformer2: FAILED
+
+PAMAP2:
+  IF-ConvTransformer2: FAILED
+
+REALDISP:
+  IF-ConvTransformer2: FAILED
+  millet    : FAILED
+
+================================================================================
+Failed Experiments:
+================================================================================
+  IF-ConvTransformer2 on OPPORTUNITY         : Unknown
+  IF-ConvTransformer2 on PAMAP2              : Unknown
+  IF-ConvTransformer2 on DSADS               : Unknown
+  IF-ConvTransformer2 on REALDISP            : Unknown
+  millet     on REALDISP            : Unknown

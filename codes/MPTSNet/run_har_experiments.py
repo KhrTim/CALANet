@@ -175,6 +175,10 @@ model.apply(weight_init)
 # Create optimizer and loss
 criterion = nn.CrossEntropyLoss().to(device)
 optimizer = torch.optim.Adam(
+    model.parameters(),
+    lr=learning_rate,
+    weight_decay=weight_decay
+)
 
 # Initialize metrics collector
 metrics_collector = MetricsCollector(
@@ -182,10 +186,6 @@ metrics_collector = MetricsCollector(
     dataset=dataset,
     task_type='HAR',
     save_dir='results'
-)
-    model.parameters(),
-    lr=learning_rate,
-    weight_decay=weight_decay
 )
 
 # Learning rate scheduler
@@ -378,7 +378,7 @@ y_true_labels = y_test_unary if 'y_test_unary' in locals() else (test_Y if 'test
 metrics_collector.compute_classification_metrics(y_true_labels, y_pred_labels)
 
 # Compute model complexity
-input_shape = (1, segment_size, input_nc)
+input_shape = (1, input_nc, segment_size)
 if input_shape is not None:
     try:
         metrics_collector.compute_model_complexity(model, input_shape, device=device if 'device' in locals() else 'cuda')
