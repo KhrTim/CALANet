@@ -43,7 +43,7 @@ MODEL_CONFIGS = {
 }
 
 def is_experiment_successful(model, dataset, dataset_type):
-    """Check if an experiment has already completed successfully"""
+    """Check if an experiment has already completed successfully AND saved metrics"""
     log_dir = f"logs_{dataset_type.lower()}/{model}"
     log_file = f"{log_dir}/{dataset}_log.txt"
 
@@ -51,9 +51,19 @@ def is_experiment_successful(model, dataset, dataset_type):
         return False
 
     try:
+        # Check if log shows successful completion
         with open(log_file, 'r') as f:
             content = f.read()
-            return 'Exit Code: 0' in content
+            if 'Exit Code: 0' not in content:
+                return False
+
+        # Also check if comprehensive metrics were saved
+        # Map model names to results directory names
+        results_model = "DSN-master" if model == "DSN" else model
+        metrics_file = f"results/{results_model}/{dataset}_metrics.json"
+
+        # Experiment is only successful if BOTH log shows Exit Code 0 AND metrics file exists
+        return os.path.exists(metrics_file)
     except:
         return False
 
