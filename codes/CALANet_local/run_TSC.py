@@ -175,23 +175,25 @@ metrics_collector = MetricsCollector(
 max_acc = 0
 acc = 0
 
-for epoch in range(epoches):
-    
-    # training
-    train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+# Track training time and memory
+with metrics_collector.track_training():
+    for epoch in range(epoches):
 
-    # evaluating
-    eval_loss, y_pred = infer(eval_queue, model, criterion)
-    results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
-    acc = results['accuracy']
-    if (epoch+1) % 50 == 0:
-        print('training... ', epoch+1)
-    if max_acc < acc:
-        os.makedirs('CALANet_local/save/tsc', exist_ok=True)
-        torch.save(model.state_dict(), 'CALANet_local/save/tsc/'+dataset + '.pt')
-        print("epoch %d, loss %e, Acc %f, best_Acc %f" % (epoch+1, eval_loss, acc, max_acc))
-        max_acc = acc
-        print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
+        # training
+        train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+
+        # evaluating
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
+        acc = results['accuracy']
+        if (epoch+1) % 50 == 0:
+            print('training... ', epoch+1)
+        if max_acc < acc:
+            os.makedirs('CALANet_local/save/tsc', exist_ok=True)
+            torch.save(model.state_dict(), 'CALANet_local/save/tsc/'+dataset + '.pt')
+            print("epoch %d, loss %e, Acc %f, best_Acc %f" % (epoch+1, eval_loss, acc, max_acc))
+            max_acc = acc
+            print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
 
 
 

@@ -131,7 +131,18 @@ net = ExampleNet(
 )
 
 model = MILLETModel("ExampleNet", device, n_clz, net)
-model.fit(train_queue, n_epochs=epoches)
+
+# Initialize metrics collector early (before training)
+metrics_collector = MetricsCollector(
+    model_name='millet',
+    dataset=dataset,
+    task_type='TSC',
+    save_dir='results'
+)
+
+# Track training time and memory
+with metrics_collector.track_training():
+    model.fit(train_queue, n_epochs=epoches)
 
 
 test_results_dict = model.evaluate(eval_queue)
@@ -144,14 +155,6 @@ print(test_results_dict["acc"])
 # print("param size = %fMB" % count_parameters_in_MB(model))
 
 # optimizer = torch.optim.Adam(
-
-# Initialize metrics collector
-metrics_collector = MetricsCollector(
-    model_name='millet',
-    dataset=dataset,
-    task_type='TSC',
-    save_dir='results'
-)
 #     model.parameters(),
 #     lr=5e-4,
 #     betas=(0.9,0.999),

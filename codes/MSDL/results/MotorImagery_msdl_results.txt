@@ -1,16 +1,16 @@
 MSDL Results on MotorImagery
 ======================================================================
-Best Epoch: 5
-Test Accuracy: 0.5900
-Test F1 (Weighted): 0.5830
-Test F1 (Macro): 0.5830
+Best Epoch: 52
+Test Accuracy: 0.6100
+Test F1 (Weighted): 0.6052
+Test F1 (Macro): 0.6052
 
 Detailed Classification Report:
               precision    recall  f1-score   support
 
-           0     0.6216    0.4600    0.5287        50
-           1     0.5714    0.7200    0.6372        50
+           0     0.5902    0.7200    0.6486        50
+           1     0.6410    0.5000    0.5618        50
 
-    accuracy                         0.5900       100
-   macro avg     0.5965    0.5900    0.5830       100
-weighted avg     0.5965    0.5900    0.5830       100
+    accuracy                         0.6100       100
+   macro avg     0.6156    0.6100    0.6052       100
+weighted avg     0.6156    0.6100    0.6052       100

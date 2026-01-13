@@ -141,29 +141,31 @@ metrics_collector = MetricsCollector(
 max_f1 = 0
 weighted_avg_f1 = 0
 
-for epoch in range(epoches):
-    
-    # training
-    train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+# Track training time and memory
+with metrics_collector.track_training():
+    for epoch in range(epoches):
 
-    # evaluating
-    eval_loss, y_pred = infer(eval_queue, model, criterion)
-    results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
-    weighted_avg_f1 = results['weighted avg']['f1-score']
-    if (epoch+1) % 50 == 0:
-        print('training... ', epoch+1)
-    if max_f1 < weighted_avg_f1:
-        os.makedirs('HT-AggNet_v2/save/with_gts', exist_ok=True)
-        torch.save(model.state_dict(), 'HT-AggNet_v2/save/with_gts/'+dataset + memo + '.pt')
-        print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
-        max_f1 = weighted_avg_f1
-        print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
-        if dataset=='UniMiB-SHAR':
-            print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)))['weighted avg']['f1-score'])
-            print('Falls:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)))['weighted avg']['f1-score'])
-        elif dataset=='PAMAP2':
-            print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17])['weighted avg']['f1-score'])
-            print('Complex:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16])['weighted avg']['f1-score'])
+        # training
+        train_loss, train_acc = train(train_queue, model, criterion, optimizer)
+
+        # evaluating
+        eval_loss, y_pred = infer(eval_queue, model, criterion)
+        results = classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True)
+        weighted_avg_f1 = results['weighted avg']['f1-score']
+        if (epoch+1) % 50 == 0:
+            print('training... ', epoch+1)
+        if max_f1 < weighted_avg_f1:
+            os.makedirs('HT-AggNet_v2/save/with_gts', exist_ok=True)
+            torch.save(model.state_dict(), 'HT-AggNet_v2/save/with_gts/'+dataset + memo + '.pt')
+            print("epoch %d, loss %e, weighted f1 %f, best_f1 %f" % (epoch+1, eval_loss, weighted_avg_f1, max_f1))
+            max_f1 = weighted_avg_f1
+            print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
+            if dataset=='UniMiB-SHAR':
+                print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9)))['weighted avg']['f1-score'])
+                print('Falls:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=list(range(9,17)))['weighted avg']['f1-score'])
+            elif dataset=='PAMAP2':
+                print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17])['weighted avg']['f1-score'])
+                print('Complex:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16])['weighted avg']['f1-score'])
 
 
 
