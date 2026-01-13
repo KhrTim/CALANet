@@ -195,7 +195,20 @@ with metrics_collector.track_training():
             max_acc = acc
             print(classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4))
 
-
+# ============================================================================
+# LOAD BEST CHECKPOINT FOR METRICS COLLECTION
+# ============================================================================
+print("\n" + "="*70)
+print("LOADING BEST CHECKPOINT")
+print("="*70)
+best_model_path = 'CALANet_local/save/tsc/'+dataset + '.pt'
+if os.path.exists(best_model_path):
+    model.load_state_dict(torch.load(best_model_path))
+    print(f"✓ Loaded best model from {best_model_path}")
+    print(f"  Best Accuracy: {max_acc:.4f}")
+else:
+    print(f"⚠ Warning: Best model checkpoint not found at {best_model_path}")
+    print("  Using final epoch model for metrics collection")
 
 # ============================================================================
 # COMPREHENSIVE METRICS COLLECTION

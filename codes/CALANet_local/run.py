@@ -167,7 +167,20 @@ with metrics_collector.track_training():
                 print('ADL:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[0,1,2,3,4,5,6,10,11,12,13,17])['weighted avg']['f1-score'])
                 print('Complex:',classification_report(y_test_unary, np.argmax(y_pred, axis=1), digits=4, output_dict=True, labels=[7,8,9,14,15,16])['weighted avg']['f1-score'])
 
-
+# ============================================================================
+# LOAD BEST CHECKPOINT FOR METRICS COLLECTION
+# ============================================================================
+print("\n" + "="*70)
+print("LOADING BEST CHECKPOINT")
+print("="*70)
+best_model_path = 'HT-AggNet_v2/save/with_gts/'+dataset + memo + '.pt'
+if os.path.exists(best_model_path):
+    model.load_state_dict(torch.load(best_model_path))
+    print(f"✓ Loaded best model from {best_model_path}")
+    print(f"  Best F1-weighted: {max_f1:.4f}")
+else:
+    print(f"⚠ Warning: Best model checkpoint not found at {best_model_path}")
+    print("  Using final epoch model for metrics collection")
 
 # ============================================================================
 # COMPREHENSIVE METRICS COLLECTION
