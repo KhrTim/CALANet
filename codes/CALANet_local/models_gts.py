@@ -115,7 +115,8 @@ class TAggBlock(nn.Module):
 
         # local temperol convolution
         #self.gconv = nn.Conv1d(i_nc, o_nc, kernel_size=5, padding='same', bias=False, groups=L)
-        self.gconv = GTSConvUnit(i_nc, o_nc, o_nc//4 )
+        # n_groups=4 matches original paper architecture (not o_nc//4 which would be 16)
+        self.gconv = GTSConvUnit(i_nc, o_nc, 4)
 
         # temporal glance convolution
         self.tgconv = nn.Conv1d(o_nc, o_nc//L, kernel_size=T)
