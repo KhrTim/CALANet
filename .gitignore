@@ -1,1 +1,39 @@
 Data/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Model artifacts and results
+*.pt
+*.pth
+*.ckpt
+logs_har/
+logs_tsc/
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# LaTeX and PDFs
+*.tex
+*.pdf
+*.aux
+*.out
+*.toc
+
+# Backups
+*.backup
+*.before_*
+
+# LLM assistant files
+.claude/
+.codex/
+.cursor/
+.aider/
+.continue/
+.windsurf/
