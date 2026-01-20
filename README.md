@@ -1,32 +1,73 @@
-# CALANet: Cheap All-Layer Aggregation for Human Activity Recognition
+# CALANet: Channel-Aware Lightweight Attention Network for HAR and TSC
 
-## Abstract
+Reproducible implementation of CALANet and baseline models for Human Activity Recognition (HAR) and Time Series Classification (TSC).
 
-This program (CALANet) is designed to perform the real-time sensor-based activity recognition. The CALANet includes all-layer aggregation structure that allows the classifier to aggregate features for all layer while maintaining the efficiency of conventional CNNs.
+## Repository Structure
 
-This software is a PyTorch implementation of the proposed method. 
-<!-- You can find detailed information in our manuscript. -->
-
-### Citation
-The paper will be available soon.
 ```
-@inproceedings{park2024calanet,
-    author = {Park, Jaegyun and Kim, Dae-Won and Lee, Jaesung},
-    booktitle = {Advances in Neural Information Processing Systems},
-    title = "{CALANet: Cheap All-Layer Aggregation for Human Activity Recognition}",
-    volume = {37},
-    year = {2024}
-}
+├── codes/                    # Model implementations
+│   ├── CALANet_local/       # Proposed model (CALANet)
+│   ├── Bi-GRU-I/            # Bidirectional GRU baseline
+│   ├── DeepConvLSTM/        # DeepConvLSTM baseline
+│   ├── DSN-master/          # DSN baseline
+│   ├── FCN_TSC/             # Fully Convolutional Network (TSC)
+│   ├── IF-ConvTransformer2/ # IF-ConvTransformer baseline
+│   ├── InceptionTime/       # InceptionTime baseline (TSC)
+│   ├── millet/              # MILLET baseline
+│   ├── MPTSNet/             # MPTSNet baseline
+│   ├── MSDL/                # MSDL baseline
+│   ├── RepHAR/              # RepHAR baseline
+│   ├── resnet/              # ResNet baseline (TSC)
+│   ├── RevTransformerAttentionHAR/  # RevAttNet baseline
+│   ├── SAGOG/               # SAGoG baseline
+│   └── shared_metrics.py    # Shared metrics collection
+├── Data/                    # Datasets (HAR & TSC)
+├── results/                 # Experiment results (JSON metrics)
+├── run_all_har_experiments.py    # Run all HAR experiments
+├── run_all_tsc_experiments.py    # Run all TSC experiments
+└── run_parallel_experiments.py   # Parallel experiment runner
 ```
 
-## License
+## Datasets
 
-This program is available for download for non-commercial use, licensed under the GNU General Public License, which is allows its use for research purposes or other free software projects but does not allow its incorporation into any type of commerical software.
+**HAR (6 datasets):** UCI-HAR, DSADS, OPPORTUNITY, KU-HAR, PAMAP2, REALDISP
 
-## Files
+**TSC (6 datasets):** AtrialFibrillation, MotorImagery, Heartbeat, PhonemeSpectra, LSST, PEMS-SF
 
-The repository contains following files.
-* `main.py`, Python script file, containing the implementation for training and test phases of the CALANet,
-* `model.py`, Python script file, containing the PyTorch implementation of the CALANet,
-* `utils.py`, Python script file, containing a collection of small Python functions,
-* `README.md`.
+## Running Experiments
+
+### Single Model
+```bash
+cd codes/CALANet_local
+python run.py  # For HAR datasets
+python run_TSC.py  # For TSC datasets
+```
+
+### All Experiments
+```bash
+python run_all_har_experiments.py
+python run_all_tsc_experiments.py
+```
+
+### Parallel Execution
+```bash
+python run_parallel_experiments.py
+```
+
+## Results
+
+Results are saved in `results/{model_name}/{dataset}_metrics.json` containing:
+- Accuracy, F1-score, Precision, Recall
+- Training time, Inference throughput
+- Memory usage, Parameter count
+- Per-class metrics and confusion matrices
+
+## Requirements
+
+- Python 3.8+
+- PyTorch 1.9+
+- NumPy, SciPy, scikit-learn
+
+## Citation
+
+If you use this code, please cite our paper.
